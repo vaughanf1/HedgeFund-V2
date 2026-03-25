@@ -3,10 +3,12 @@
 Architecture:
   consume_queue  -- Long-running Celery task; BLPOP-blocks on opportunity_queue.
   fan_out        -- Dispatches 5 run_persona_agent tasks in parallel (one per persona).
+                   Also stores the full opportunity dict in Redis for run_committee.
   run_persona_agent -- Invokes PERSONA_GRAPH, persists verdict to Redis hash,
                        increments atomic counter, publishes events.
-  run_committee  -- Triggered by last completing agent (counter == 5); aggregates
-                    verdicts and validates inter-agent variance.
+  run_committee  -- Triggered by last completing agent (counter == 5); runs the full
+                    pipeline: asymmetric scoring → committee aggregation → CIO decision
+                    → DB persist → events → Redis cleanup.
 
 No Celery Chord is used. Fan-in is implemented via Redis HINCRBY counter.
 """
@@ -17,6 +19,7 @@ import asyncio
 import json
 import logging
 import os
+from datetime import datetime, timezone
 from typing import Any
 
 import redis
@@ -185,6 +188,18 @@ def fan_out(self, opportunity: dict) -> None:
 
     logger.info("Fanning out to %d agents for %s", AGENT_COUNT, opportunity_id)
 
+    # Store full opportunity in Redis so run_committee can load it without
+    # re-deserialising from the queue or relying on task arguments.
+    r = redis.from_url(_REDIS_URL)
+    try:
+        r.set(
+            f"opportunity:{opportunity_id}",
+            json.dumps(opportunity, default=str),
+            ex=VERDICT_TTL,
+        )
+    finally:
+        r.close()
+
     for persona in AGENTS:
         run_persona_agent.delay(opportunity_id, persona, data_context)
 
@@ -224,24 +239,46 @@ def consume_queue(self) -> None:
     bind=True,
 )
 def run_committee(self, opportunity_id: str) -> None:
-    """Aggregate all five agent verdicts and validate inter-agent variance.
+    """Aggregate all five agent verdicts and produce a CIO decision.
 
-    Loads the five verdicts from the Redis hash, parses them into AgentVerdict
-    objects, computes variance, and validates the committee. Full committee
-    aggregation and CIO decision are implemented in Plan 03-03.
+    Full pipeline (Plan 03-03):
+    1. Load verdicts from Redis hash.
+    2. Parse into AgentVerdict objects.
+    3. Variance check — log warning if agents converged (low variance), but
+       continue: convergence does not block analysis.
+    4. Load opportunity dict from Redis (stored by fan_out).
+    5. evaluate_asymmetric() — 10X asymmetric bet scoring.
+    6. aggregate_committee() — context-weighted conviction + regime detection.
+    7. Publish COMMITTEE_COMPLETE event.
+    8. make_cio_decision() — deterministic CIO decision.
+    9. Publish DECISION_MADE event.
+    10. Persist AgentVerdictRecord rows and CIODecisionRecord to DB via sync
+        SQLAlchemy session.
+    11. Clean up Redis keys.
 
     Args:
         opportunity_id: Compound key ``ticker:detected_at``.
     """
+    from app.analysis.asymmetric import evaluate_asymmetric
+    from app.analysis.cio import make_cio_decision
+    from app.analysis.committee import aggregate_committee
     from app.analysis.variance import compute_variance_score, is_committee_valid
+    from app.db.engine import SyncSessionLocal
+    from app.db.models import AgentVerdictRecord, CIODecisionRecord
 
     r = redis.from_url(_REDIS_URL)
     try:
+        # ------------------------------------------------------------------
+        # 1 & 2. Load and parse verdicts
+        # ------------------------------------------------------------------
         raw_verdicts = r.hgetall(f"verdicts:{opportunity_id}")
         verdicts = [
             AgentVerdict(**json.loads(v)) for v in raw_verdicts.values()
         ]
 
+        # ------------------------------------------------------------------
+        # 3. Variance check (warn only — do not block)
+        # ------------------------------------------------------------------
         variance = compute_variance_score(verdicts)
         valid = is_committee_valid(verdicts)
 
@@ -255,13 +292,118 @@ def run_committee(self, opportunity_id: str) -> None:
 
         if not valid:
             logger.warning(
-                "Low variance detected for %s (%.2f) — agents converged sycophantically",
+                "Low variance detected for %s (%.2f) — agents may have converged "
+                "sycophantically; proceeding with analysis",
                 opportunity_id,
                 variance,
             )
 
-        # TODO(03-03): Committee aggregation, asymmetric scoring, CIO decision
-        logger.info("Committee task complete (stub) for %s", opportunity_id)
+        # ------------------------------------------------------------------
+        # 4. Load opportunity from Redis
+        # ------------------------------------------------------------------
+        raw_opportunity = r.get(f"opportunity:{opportunity_id}")
+        if raw_opportunity:
+            opportunity = json.loads(raw_opportunity)
+        else:
+            # Graceful degradation — reconstruct minimal dict from opportunity_id
+            logger.warning(
+                "Opportunity dict not found in Redis for %s — using minimal stub",
+                opportunity_id,
+            )
+            ticker, detected_at = opportunity_id.split(":", 1) if ":" in opportunity_id else (opportunity_id, "")
+            opportunity = {"ticker": ticker, "detected_at": detected_at}
+
+        # ------------------------------------------------------------------
+        # 5. Asymmetric scoring
+        # ------------------------------------------------------------------
+        asymmetric_result = evaluate_asymmetric(verdicts, opportunity)
+
+        # ------------------------------------------------------------------
+        # 6. Committee aggregation
+        # ------------------------------------------------------------------
+        report = aggregate_committee(opportunity_id, verdicts, opportunity, asymmetric_result)
+
+        # ------------------------------------------------------------------
+        # 7. Publish COMMITTEE_COMPLETE
+        # ------------------------------------------------------------------
+        publish_event(
+            r,
+            "COMMITTEE_COMPLETE",
+            {
+                "opportunity_id": opportunity_id,
+                "consensus": report.consensus,
+                "weighted_conviction": report.weighted_conviction,
+                "asymmetric_flag": report.asymmetric_flag,
+                "dissent_agents": report.dissent_agents,
+            },
+        )
+
+        # ------------------------------------------------------------------
+        # 8. CIO decision
+        # ------------------------------------------------------------------
+        decision = make_cio_decision(report)
+
+        # ------------------------------------------------------------------
+        # 9. Publish DECISION_MADE
+        # ------------------------------------------------------------------
+        publish_event(
+            r,
+            "DECISION_MADE",
+            {
+                "opportunity_id": opportunity_id,
+                "final_verdict": decision.final_verdict,
+                "conviction_score": decision.conviction_score,
+                "suggested_allocation_pct": decision.suggested_allocation_pct,
+                "risk_rating": decision.risk_rating,
+                "time_horizon": decision.time_horizon,
+            },
+        )
+
+        # ------------------------------------------------------------------
+        # 10. Persist to DB via sync session
+        # ------------------------------------------------------------------
+        now = datetime.now(timezone.utc)
+
+        with SyncSessionLocal() as session:
+            # One AgentVerdictRecord row per persona
+            for v in verdicts:
+                record = AgentVerdictRecord(
+                    analysed_at=now,
+                    opportunity_id=opportunity_id,
+                    persona=v.persona,
+                    verdict=v.verdict,
+                    confidence=v.confidence,
+                    verdict_json=json.dumps(v.model_dump(), default=str),
+                )
+                session.merge(record)
+
+            # One CIODecisionRecord row per opportunity
+            cio_record = CIODecisionRecord(
+                decided_at=now,
+                opportunity_id=opportunity_id,
+                conviction_score=decision.conviction_score,
+                suggested_allocation_pct=decision.suggested_allocation_pct,
+                final_verdict=decision.final_verdict,
+                decision_json=json.dumps(decision.model_dump(), default=str),
+            )
+            session.merge(cio_record)
+            session.commit()
+
+        logger.info(
+            "Committee pipeline complete for %s — verdict=%s conviction=%d",
+            opportunity_id,
+            decision.final_verdict,
+            decision.conviction_score,
+        )
+
+        # ------------------------------------------------------------------
+        # 11. Clean up Redis keys
+        # ------------------------------------------------------------------
+        r.delete(
+            f"verdicts:{opportunity_id}",
+            f"verdicts_counter:{opportunity_id}",
+            f"opportunity:{opportunity_id}",
+        )
 
     finally:
         r.close()
