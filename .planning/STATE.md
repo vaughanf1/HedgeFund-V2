@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** The system discovers investment opportunities before the user has to think about them — a living alpha engine, not a reactive analyzer.
-**Current focus:** Phase 4 In Progress — live feed panel and inspection sheet complete (04-03)
+**Current focus:** Phase 4 COMPLETE — all four plans executed, full-stack alpha engine delivered
 
 ## Current Position
 
-Phase: 4 of 4 (Real-Time Frontend and Visual Agent Operating System — In progress)
-Plan: 3 of 4 in current phase (04-01, 04-02, 04-03 complete; 04-04 remaining)
-Status: In progress — Phase 4 plans 1, 2, and 3 executed
-Last activity: 2026-03-25 — Completed 04-03-PLAN.md (live opportunity feed, FeedItem, OpportunitySheet, AgentVerdictPanel)
+Phase: 4 of 4 (Real-Time Frontend and Visual Agent Operating System — COMPLETE)
+Plan: 4 of 4 in current phase (04-01, 04-02, 04-03, 04-04 all complete)
+Status: Phase 4 complete — all plans executed
+Last activity: 2026-03-25 — Completed 04-04-PLAN.md (output dashboard, ranked opportunity cards, useOpportunities hook, AgentBreakdown)
 
-Progress: [████████████░] ~97% (13/14 estimated plans)
+Progress: [████████████] 100% (14/14 estimated plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
+- Total plans completed: 14
 - Average duration: ~4 min
-- Total execution time: ~40 min
+- Total execution time: ~56 min
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: [████████████░] ~97% (13/14 estimated plans)
 | Phase 1 | 3 | ~21 min | ~7 min |
 | Phase 2 | 3 | ~6 min | ~2 min |
 | Phase 3 | 4 | ~16 min | ~4 min |
-| Phase 4 | 1 | ~5 min | ~5 min |
+| Phase 4 | 4 | ~13 min | ~3 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-03 (~2 min), 03-01 (~4 min), 03-02 (~4 min), 03-04 (~5 min), 03-03 (~3 min)
-- Trend: Stable, ~4 min average for well-defined Phase 3 tasks
+- Last 5 plans: 04-01 (~5 min), 04-02 (~3 min), 04-03 (~3 min), 04-04 (~5 min)
+- Trend: Stable, ~4 min average throughout
 
 *Updated after each plan completion*
 
@@ -91,6 +91,10 @@ Recent decisions affecting current work:
 - [04-03 D-2]: OpportunitySheet rendered inside OpportunityFeed (not App.tsx) — sheet lifecycle co-located with feed; controlled via Zustand selectedOpportunityId
 - [04-03 D-3]: toAgentScore mapper normalises confidence/confidence_score aliases from backend JSON
 - [04-03 D-4]: AGENT_COMPLETE only creates feed item when ticker is present in SSE data
+- [04-04 D-1]: Opportunity imported from @/types/pipeline (not redefined in store) — 04-03 already created types/pipeline.ts with full Opportunity type
+- [04-04 D-2]: fetchOpportunityDetail is standalone async function (not store action) — Zustand store actions must be sync
+- [04-04 D-3]: useOpportunities called once in OutputDashboard (not App.tsx) — colocation with the panel that displays results
+- [04-04 D-4]: convictionScore display normalized — backend returns 0-100 int; >1 check displays correctly
 
 ### Pending Todos
 
@@ -108,6 +112,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25T22:56:00Z
-Stopped at: Completed 04-03-PLAN.md — Live opportunity feed with three sections, FeedItem cards, OpportunitySheet slide-over with REST API fetch, AgentVerdictPanel per-persona collapsible breakdown with persona colors. Phase 4 plan 3 of 4 done. Only 04-04 (rankings panel) remains.
+Last session: 2026-03-25T22:53:39Z
+Stopped at: Completed 04-04-PLAN.md — Output dashboard with ranked OpportunityCards, useOpportunities REST hydration hook, AgentBreakdown persona-colored confidence bars, DECISION_MADE SSE handler building full Opportunity. Phase 4 and all phases COMPLETE.
 Resume file: None
