@@ -13,7 +13,7 @@ A proactive multi-agent investment discovery platform built in four dependency-o
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Infrastructure and Data Foundation** - Docker Compose stack running, all data connectors ingesting, canonical data schema established, agent prompt architecture designed with divergence constraints baked in
-- [ ] **Phase 2: Signal Detection and Opportunity Pipeline** - Background scanner running on schedule, signal detectors live, quality gate filtering before any LLM call, raw signals and opportunities persisted and inspectable
+- [x] **Phase 2: Signal Detection and Opportunity Pipeline** - Background scanner running on schedule, signal detectors live, quality gate filtering before any LLM call, raw signals and opportunities persisted and inspectable
 - [ ] **Phase 3: Agent Analysis Engine** - All five investor persona agents running in parallel, 10X asymmetric layer active, committee aggregation and CIO final decision producing structured verdicts, Redis events emitted at every pipeline stage
 - [ ] **Phase 4: Real-Time Frontend and Visual Agent Operating System** - React Flow agent graph rendering live pipeline state, opportunity feed streaming, full output dashboard showing top opportunities with per-agent breakdowns
 
@@ -58,12 +58,12 @@ Plans:
   4. Raw detected signals are queryable via the FastAPI read endpoint; each signal shows its score, detection type, and timestamp
   5. Per-symbol deduplication in Redis prevents the same opportunity from entering the queue multiple times within a configurable window
 
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 02-01: Celery Beat scheduler, market scanner workers, signal detector rules (volume anomaly, price breakout, sector momentum)
-- [ ] 02-02: Insider buying cluster detector, news catalyst detector, composite signal scorer, quality gate
-- [ ] 02-03: Redis opportunity queue with idempotency keys and deduplication; FastAPI read endpoints for signals (VIS-01, VIS-04)
+- [x] 02-01-PLAN.md — DetectedSignal model + migration, volume spike / price breakout / sector momentum detectors, scan_market Celery task, Beat schedule entry
+- [x] 02-02-PLAN.md — Insider cluster detector, news catalyst detector, composite scorer, quality gate, full scan_market wiring
+- [x] 02-03-PLAN.md — Redis opportunity queue with SET NX dedup, FastAPI read endpoints for signals (VIS-01, VIS-04)
 
 ---
 
@@ -125,10 +125,10 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure and Data Foundation | 3/3 | ✓ Complete | 2026-03-25 |
-| 2. Signal Detection and Opportunity Pipeline | 0/3 | Not started | - |
+| 2. Signal Detection and Opportunity Pipeline | 3/3 | ✓ Complete | 2026-03-25 |
 | 3. Agent Analysis Engine | 0/4 | Not started | - |
 | 4. Real-Time Frontend and Visual Agent Operating System | 0/4 | Not started | - |
 
 ---
 *Roadmap created: 2026-03-25*
-*Last updated: 2026-03-25 after Phase 1 execution complete*
+*Last updated: 2026-03-25 after Phase 2 execution complete*

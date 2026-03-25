@@ -16,14 +16,14 @@
 
 ### Signal Detection
 
-- [ ] **SGNL-01**: System detects unusual volume spikes relative to recent history
-- [ ] **SGNL-02**: System detects significant price movements (breakouts, gap-ups/downs)
-- [ ] **SGNL-03**: System detects insider buying clusters (multiple insiders buying within short windows)
-- [ ] **SGNL-04**: System detects news catalysts (earnings surprises, partnerships, regulatory changes)
-- [ ] **SGNL-05**: System detects sector momentum shifts (rotating capital flows, relative strength changes)
-- [ ] **SGNL-06**: Each detected signal is scored and ranked automatically
-- [ ] **SGNL-07**: Signal quality gate filters low-quality signals before passing to LLM agents (cost control)
-- [ ] **SGNL-08**: Scanning runs on a configurable schedule (e.g. every 15 minutes)
+- [x] **SGNL-01**: System detects unusual volume spikes relative to recent history
+- [x] **SGNL-02**: System detects significant price movements (breakouts, gap-ups/downs)
+- [x] **SGNL-03**: System detects insider buying clusters (multiple insiders buying within short windows)
+- [x] **SGNL-04**: System detects news catalysts (earnings surprises, partnerships, regulatory changes)
+- [x] **SGNL-05**: System detects sector momentum shifts (rotating capital flows, relative strength changes)
+- [x] **SGNL-06**: Each detected signal is scored and ranked automatically
+- [x] **SGNL-07**: Signal quality gate filters low-quality signals before passing to LLM agents (cost control)
+- [x] **SGNL-08**: Scanning runs on a configurable schedule (e.g. every 15 minutes)
 
 ### Investor Agents
 
@@ -72,10 +72,10 @@
 
 ### Intermediate Visibility
 
-- [ ] **VIS-01**: Raw detected signals are stored and viewable
+- [x] **VIS-01**: Raw detected signals are stored and viewable
 - [ ] **VIS-02**: Filtered opportunities are inspectable at each pipeline stage
 - [ ] **VIS-03**: Agent outputs with full scoring breakdowns are viewable
-- [ ] **VIS-04**: Full logs with timestamps for every pipeline event
+- [x] **VIS-04**: Full logs with timestamps for every pipeline event
 
 ### Infrastructure
 
@@ -124,16 +124,16 @@
 | DATA-06 | Phase 1 | Complete |
 | INFR-01 | Phase 1 | Complete |
 | INFR-02 | Phase 1 | Pending |
-| SGNL-01 | Phase 2 | Pending |
-| SGNL-02 | Phase 2 | Pending |
-| SGNL-03 | Phase 2 | Pending |
-| SGNL-04 | Phase 2 | Pending |
-| SGNL-05 | Phase 2 | Pending |
-| SGNL-06 | Phase 2 | Pending |
-| SGNL-07 | Phase 2 | Pending |
-| SGNL-08 | Phase 2 | Pending |
-| VIS-01 | Phase 2 | Pending |
-| VIS-04 | Phase 2 | Pending |
+| SGNL-01 | Phase 2 | Complete |
+| SGNL-02 | Phase 2 | Complete |
+| SGNL-03 | Phase 2 | Complete |
+| SGNL-04 | Phase 2 | Complete |
+| SGNL-05 | Phase 2 | Complete |
+| SGNL-06 | Phase 2 | Complete |
+| SGNL-07 | Phase 2 | Complete |
+| SGNL-08 | Phase 2 | Complete |
+| VIS-01 | Phase 2 | Complete |
+| VIS-04 | Phase 2 | Complete |
 | AGNT-01 | Phase 3 | Pending |
 | AGNT-02 | Phase 3 | Pending |
 | AGNT-03 | Phase 3 | Pending |
@@ -172,4 +172,4 @@
 
 ---
 *Requirements defined: 2026-03-25*
-*Last updated: 2026-03-25 — traceability updated after roadmap creation*
+*Last updated: 2026-03-25 — Phase 2 requirements marked Complete*
