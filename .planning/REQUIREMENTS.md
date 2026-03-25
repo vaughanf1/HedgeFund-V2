@@ -52,36 +52,36 @@
 
 ### Visual Agent Operating System
 
-- [ ] **UI-01**: Canvas/graph-based view (React Flow) showing the full agent pipeline
-- [ ] **UI-02**: Opportunities flow visually through states: detected → validating → analyzing → debating → scored → approved/rejected
-- [ ] **UI-03**: Agent nodes show live status with animated state transitions
-- [ ] **UI-04**: Connections between agents are visible with data flow direction
+- [x] **UI-01**: Canvas/graph-based view (React Flow) showing the full agent pipeline
+- [x] **UI-02**: Opportunities flow visually through states: detected → validating → analyzing → debating → scored → approved/rejected
+- [x] **UI-03**: Agent nodes show live status with animated state transitions
+- [x] **UI-04**: Connections between agents are visible with data flow direction
 
 ### Opportunity Feed
 
-- [ ] **FEED-01**: Live feed showing new opportunity detections in real time
-- [ ] **FEED-02**: Feed shows trending ideas and highest conviction plays
-- [ ] **FEED-03**: Feed shows recently rejected ideas with rejection reasons
+- [x] **FEED-01**: Live feed showing new opportunity detections in real time
+- [x] **FEED-02**: Feed shows trending ideas and highest conviction plays
+- [x] **FEED-03**: Feed shows recently rejected ideas with rejection reasons
 
 ### Final Output Screen
 
-- [ ] **OUT-01**: Dashboard showing top 5-10 ranked opportunities with full breakdown
-- [ ] **OUT-02**: Each opportunity shows: conviction score, risk rating, expected upside, time horizon, key catalysts
-- [ ] **OUT-03**: Each opportunity shows per-agent score breakdown and reasoning
-- [ ] **OUT-04**: CIO summary with final recommendation per opportunity
+- [x] **OUT-01**: Dashboard showing top 5-10 ranked opportunities with full breakdown
+- [x] **OUT-02**: Each opportunity shows: conviction score, risk rating, expected upside, time horizon, key catalysts
+- [x] **OUT-03**: Each opportunity shows per-agent score breakdown and reasoning
+- [x] **OUT-04**: CIO summary with final recommendation per opportunity
 
 ### Intermediate Visibility
 
 - [x] **VIS-01**: Raw detected signals are stored and viewable
-- [ ] **VIS-02**: Filtered opportunities are inspectable at each pipeline stage
-- [ ] **VIS-03**: Agent outputs with full scoring breakdowns are viewable
+- [x] **VIS-02**: Filtered opportunities are inspectable at each pipeline stage
+- [x] **VIS-03**: Agent outputs with full scoring breakdowns are viewable
 - [x] **VIS-04**: Full logs with timestamps for every pipeline event
 
 ### Infrastructure
 
 - [x] **INFR-01**: All services run via Docker Compose with a single `docker-compose up` command
-- [ ] **INFR-02**: Dark mode, premium aesthetic (Bloomberg x Palantir inspired)
-- [ ] **INFR-03**: UI feels real-time via SSE updates from backend to frontend
+- [x] **INFR-02**: Dark mode, premium aesthetic (Bloomberg x Palantir inspired)
+- [x] **INFR-03**: UI feels real-time via SSE updates from backend to frontend
 
 ## v2 Requirements
 
@@ -123,7 +123,7 @@
 | DATA-05 | Phase 1 | Complete |
 | DATA-06 | Phase 1 | Complete |
 | INFR-01 | Phase 1 | Complete |
-| INFR-02 | Phase 1 | Pending |
+| INFR-02 | Phase 4 | Complete |
 | SGNL-01 | Phase 2 | Complete |
 | SGNL-02 | Phase 2 | Complete |
 | SGNL-03 | Phase 2 | Complete |
@@ -150,20 +150,20 @@
 | CIO-03 | Phase 3 | Complete |
 | CIO-04 | Phase 3 | Complete |
 | CIO-05 | Phase 3 | Complete |
-| UI-01 | Phase 4 | Pending |
-| UI-02 | Phase 4 | Pending |
-| UI-03 | Phase 4 | Pending |
-| UI-04 | Phase 4 | Pending |
-| FEED-01 | Phase 4 | Pending |
-| FEED-02 | Phase 4 | Pending |
-| FEED-03 | Phase 4 | Pending |
-| OUT-01 | Phase 4 | Pending |
-| OUT-02 | Phase 4 | Pending |
-| OUT-03 | Phase 4 | Pending |
-| OUT-04 | Phase 4 | Pending |
-| VIS-02 | Phase 4 | Pending |
-| VIS-03 | Phase 4 | Pending |
-| INFR-03 | Phase 4 | Pending |
+| UI-01 | Phase 4 | Complete |
+| UI-02 | Phase 4 | Complete |
+| UI-03 | Phase 4 | Complete |
+| UI-04 | Phase 4 | Complete |
+| FEED-01 | Phase 4 | Complete |
+| FEED-02 | Phase 4 | Complete |
+| FEED-03 | Phase 4 | Complete |
+| OUT-01 | Phase 4 | Complete |
+| OUT-02 | Phase 4 | Complete |
+| OUT-03 | Phase 4 | Complete |
+| OUT-04 | Phase 4 | Complete |
+| VIS-02 | Phase 4 | Complete |
+| VIS-03 | Phase 4 | Complete |
+| INFR-03 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 47 total
@@ -172,4 +172,4 @@
 
 ---
 *Requirements defined: 2026-03-25*
-*Last updated: 2026-03-25 — Phase 3 requirements marked Complete*
+*Last updated: 2026-03-25 — Phase 4 requirements marked Complete (all v1 requirements complete)*
