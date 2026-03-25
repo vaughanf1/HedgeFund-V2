@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 ## Current Position
 
 Phase: 3 of 4 (Agent Analysis Engine — IN PROGRESS)
-Plan: 2 of 4 in current phase (03-02 complete)
-Status: Executing Wave 3 next (plan 03-03)
-Last activity: 2026-03-25 — Completed 03-02-PLAN (BLPOP consumer, five-agent fan-out, Redis HINCRBY fan-in, variance scoring, AgentVerdictRecord/CIODecisionRecord ORM, migration 0003)
+Plan: 4 of 4 in current phase (03-04 complete; 03-03 parallel)
+Status: Wave 3 executing (03-03 parallel; 03-04 complete)
+Last activity: 2026-03-25 — Completed 03-04-PLAN (SSE event stream endpoint, opportunities list + detail API, all three routers registered in main.py)
 
-Progress: [████████░░] ~67% (8/12 estimated plans)
+Progress: [█████████░] ~75% (9/12 estimated plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: ~4 min
-- Total execution time: ~32 min
+- Total execution time: ~37 min
 
 **By Phase:**
 
@@ -29,7 +29,7 @@ Progress: [████████░░] ~67% (8/12 estimated plans)
 |-------|-------|-------|----------|
 | Phase 1 | 3 | ~21 min | ~7 min |
 | Phase 2 | 3 | ~6 min | ~2 min |
-| Phase 3 (so far) | 2 | ~8 min | ~4 min |
+| Phase 3 (so far) | 3+ | ~13 min | ~4 min |
 
 **Recent Trend:**
 - Last 5 plans: 02-02 (~2 min), 02-03 (~2 min), 03-01 (~4 min), 03-02 (~4 min)
@@ -70,6 +70,8 @@ Recent decisions affecting current work:
 - [03-02 D-1]: TYPE_CHECKING guard for AgentVerdict in variance.py — used only in type hints at runtime; prevents future circular import
 - [03-02 D-2]: nest_asyncio fallback in _run_graph_sync — handles test environments with running event loops
 - [03-02 D-3]: run_committee deferred-imports variance module — avoids circular import between tasks and analysis packages at module load
+- [03-04 D-1]: EventSourceResponse wraps async generator; client reconnect handled by browser EventSource API (Phase 4 scope)
+- [03-04 D-2]: risk_rating extracted from decision_json blob via json.loads in OpportunitySummary — avoids separate DB column; graceful UNKNOWN fallback
 
 ### Pending Todos
 
@@ -88,5 +90,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-03-25
-Stopped at: Completed 03-02-PLAN.md — BLPOP consumer, five-agent fan-out, Redis HINCRBY fan-in, variance scoring, ORM models, migration 0003. Wave 2 complete.
+Stopped at: Completed 03-04-PLAN.md — SSE event stream endpoint, opportunities list + detail API, all routers registered. Wave 3 plan 03-04 complete.
 Resume file: None
