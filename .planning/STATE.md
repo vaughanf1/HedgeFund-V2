@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 
 ## Current Position
 
-Phase: 3 of 4 (Agent Analysis Engine — COMPLETE)
-Plan: 4 of 4 in current phase (03-03 and 03-04 both complete — Wave 3 done)
-Status: Phase complete — ready for Phase 4
-Last activity: 2026-03-25 — Phase 3 complete (all 4 plans executed: schemas+graph, fan-out, committee+CIO, SSE+API)
+Phase: 4 of 4 (Real-Time Frontend and Visual Agent Operating System — In progress)
+Plan: 1 of 4 in current phase (04-01 complete)
+Status: In progress — Phase 4 plan 1 executed
+Last activity: 2026-03-25 — Completed 04-01-PLAN.md (Vite SPA scaffold, React Flow graph, Zustand store, SSE hook)
 
-Progress: [██████████] ~83% (10/12 estimated plans)
+Progress: [███████████░] ~92% (11/12 estimated plans)
 
 ## Performance Metrics
 
@@ -30,6 +30,7 @@ Progress: [██████████] ~83% (10/12 estimated plans)
 | Phase 1 | 3 | ~21 min | ~7 min |
 | Phase 2 | 3 | ~6 min | ~2 min |
 | Phase 3 | 4 | ~16 min | ~4 min |
+| Phase 4 | 1 | ~5 min | ~5 min |
 
 **Recent Trend:**
 - Last 5 plans: 02-03 (~2 min), 03-01 (~4 min), 03-02 (~4 min), 03-04 (~5 min), 03-03 (~3 min)
@@ -77,6 +78,11 @@ Recent decisions affecting current work:
 - [03-03 D-3]: Low variance warning does not block pipeline — committee proceeds even if agents converged sycophantically; variance is informational
 - [03-03 D-4]: Asymmetric 1.5x allocation multiplier capped at 10% — prevents runaway allocation on highly asymmetric plays
 - [03-03 D-5]: SPLIT consensus with conviction>=60 maps to MONITOR not PASS — acknowledges partial conviction without committing capital
+- [04-01 D-1]: shadcn/ui components created manually (not via npx shadcn init) — avoids interactive CLI in automated execution
+- [04-01 D-2]: @radix-ui/react-dialog used for Sheet (@radix-ui/react-sheet does not exist as npm package)
+- [04-01 D-3]: nodeTypes defined at PipelineGraph module level to prevent React Flow node re-registration anti-pattern
+- [04-01 D-4]: dagre layout computed once at pipelineStore module load, not per render
+- [04-01 D-5]: StageNode suppresses target Handle for scanner and source Handle for cio (entry/sink nodes)
 
 ### Pending Todos
 
@@ -95,5 +101,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-03-25
-Stopped at: Completed 03-03-PLAN.md — asymmetric scoring layer, regime-weighted committee aggregation, deterministic CIO decision engine, full run_committee pipeline. Phase 3 complete (all 4 plans done).
+Stopped at: Completed 04-01-PLAN.md — Vite SPA scaffold, React Flow 10-node pipeline graph with dagre LR layout, Zustand store, SSE hook, three-panel Bloomberg dark dashboard. Phase 4 plan 1 of 4 done.
 Resume file: None
