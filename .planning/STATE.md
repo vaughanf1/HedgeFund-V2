@@ -5,34 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** The system discovers investment opportunities before the user has to think about them — a living alpha engine, not a reactive analyzer.
-**Current focus:** Phase 2 in progress — Signal Detection and Opportunity Pipeline
+**Current focus:** Phase 2 COMPLETE — moving to Phase 3: Agent Analysis and Recommendation
 
 ## Current Position
 
-Phase: 2 of 4 (Signal Detection and Opportunity Pipeline)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-03-25 — Completed 02-02-PLAN (insider cluster, news catalyst, composite scorer, quality gate, wired scan_market)
+Phase: 2 of 4 (Signal Detection and Opportunity Pipeline — COMPLETE)
+Plan: 3 of 3 in current phase (phase complete)
+Status: Phase complete — ready for Phase 3
+Last activity: 2026-03-25 — Completed 02-03-PLAN (Redis dedup queue, enqueue_opportunity, GET /api/v1/signals endpoints)
 
-Progress: [█████░░░░░] ~42% (5/12 estimated plans)
+Progress: [██████░░░░] ~50% (6/12 estimated plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: ~6 min
-- Total execution time: ~23 min
+- Total plans completed: 6
+- Average duration: ~4 min
+- Total execution time: ~25 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | Phase 1 | 3 | ~21 min | ~7 min |
-| Phase 2 | 2 | ~4 min | ~2 min |
+| Phase 2 | 3 | ~6 min | ~2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (~5 min), 01-02 (~3 min), 01-03 (~5 min), 02-01 (~2 min), 02-02 (~2 min)
-- Trend: Stable
+- Last 5 plans: 01-03 (~5 min), 02-01 (~2 min), 02-02 (~2 min), 02-03 (~2 min)
+- Trend: Stable, accelerating on well-defined tasks
 
 *Updated after each plan completion*
 
@@ -61,7 +61,9 @@ Recent decisions affecting current work:
 - [02-02 D-02-02-1]: INTERVAL uses f-string injection at module load — PostgreSQL INTERVAL does not accept bind parameters
 - [02-02 D-02-02-2]: ILIKE patterns injected as string literals — cannot parameterize ILIKE arrays in PostgreSQL
 - [02-02 D-02-02-3]: Composite denominator = fired-signal weights only — prevents penalizing tickers where fewer detectors fire
-- [02-02 D-02-02-4]: Redis instrumentation failures logged as warnings, not errors — observability must not block scan correctness
+- [02-02 D-02-02-4]: Redis instrumentation failures logged as warnings, not errors
+- [02-03]: Dedup is per-ticker (not per-signal-type) — Phase 3 agents analyze full ticker opportunity via BLPOP
+- [02-03]: json.dumps with default=str in enqueue_opportunity — safety net for Decimal/datetime edge cases in signal detail dicts — observability must not block scan correctness
 
 ### Pending Todos
 
@@ -79,6 +81,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25T15:50:34Z
-Stopped at: Completed 02-02-PLAN.md — insider cluster, news catalyst, composite scorer, quality gate, wired scan_market
+Last session: 2026-03-25T15:55:14Z
+Stopped at: Completed 02-03-PLAN.md — Redis dedup queue, enqueue_opportunity wired into scan_market, GET /api/v1/signals endpoints. Phase 2 COMPLETE.
 Resume file: None
