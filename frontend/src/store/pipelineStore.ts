@@ -6,6 +6,7 @@ import {
   applyNodeChanges,
 } from '@xyflow/react'
 import { getLayoutedElements } from '@/lib/dagre'
+import type { FeedItem } from '@/types/pipeline'
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -18,15 +19,8 @@ export interface PipelineNodeData extends Record<string, unknown> {
   conviction?: number
 }
 
-export interface FeedItem {
-  id: string
-  ticker: string
-  verdict: string
-  conviction: number
-  allocation: number
-  riskRating: string
-  decidedAt: string
-}
+// Re-export FeedItem from types for convenience
+export type { FeedItem }
 
 export interface Opportunity {
   opportunityId: string
@@ -80,6 +74,7 @@ interface PipelineState {
   edges: Edge[]
   feedItems: FeedItem[]
   outputRankings: Opportunity[]
+  selectedOpportunityId: string | null
 }
 
 interface PipelineActions {
@@ -88,6 +83,7 @@ interface PipelineActions {
   addFeedItem: (item: FeedItem) => void
   setOutputRankings: (rankings: Opportunity[]) => void
   handleSSEEvent: (eventType: string, data: Record<string, unknown>) => void
+  setSelectedOpportunity: (id: string | null) => void
 }
 
 type PipelineStore = PipelineState & PipelineActions
@@ -97,6 +93,7 @@ export const usePipelineStore = create<PipelineStore>((set, get) => ({
   edges: initialEdges,
   feedItems: [],
   outputRankings: [],
+  selectedOpportunityId: null,
 
   onNodesChange: (changes) => {
     set((state) => ({
@@ -132,6 +129,10 @@ export const usePipelineStore = create<PipelineStore>((set, get) => ({
     set({ outputRankings: rankings })
   },
 
+  setSelectedOpportunity: (id) => {
+    set({ selectedOpportunityId: id })
+  },
+
   handleSSEEvent: (eventType, data) => {
     const { updateNodeStatus, addFeedItem } = get()
 
@@ -144,10 +145,22 @@ export const usePipelineStore = create<PipelineStore>((set, get) => ({
       case 'AGENT_COMPLETE': {
         const agentId = data['agent_id'] as string | undefined
         const verdict = data['verdict'] as string | undefined
+        const ticker = data['ticker'] as string | undefined
+        const persona = data['persona'] as string | undefined
         if (agentId) {
           updateNodeStatus(agentId, 'complete', {
             lastResult: verdict ? String(verdict) : undefined,
           })
+        }
+        if (ticker) {
+          const detectionItem: FeedItem = {
+            id: `${agentId ?? 'agent'}-${ticker}-${Date.now()}`,
+            type: 'detection',
+            ticker,
+            headline: `${persona ?? agentId ?? 'Agent'} completed analysis`,
+            timestamp: Date.now(),
+          }
+          addFeedItem(detectionItem)
         }
         break
       }
@@ -158,17 +171,29 @@ export const usePipelineStore = create<PipelineStore>((set, get) => ({
       case 'DECISION_MADE': {
         updateNodeStatus('cio', 'complete')
         const decision = data['decision'] as Record<string, unknown> | undefined
+        const ticker = (data['ticker'] as string) ?? 'UNKNOWN'
+        const opportunityId = (data['opportunity_id'] as string) ?? crypto.randomUUID()
         if (decision) {
-          const item: FeedItem = {
-            id: (data['opportunity_id'] as string) ?? crypto.randomUUID(),
-            ticker: (data['ticker'] as string) ?? 'UNKNOWN',
-            verdict: (decision['final_verdict'] as string) ?? 'UNKNOWN',
-            conviction: Number(decision['conviction_score'] ?? 0),
-            allocation: Number(decision['suggested_allocation_pct'] ?? 0),
-            riskRating: (decision['risk_rating'] as string) ?? 'UNKNOWN',
-            decidedAt: (decision['decided_at'] as string) ?? new Date().toISOString(),
+          const finalVerdict = (decision['final_verdict'] as string) ?? 'UNKNOWN'
+          const convictionScore = Number(decision['conviction_score'] ?? 0)
+          const riskRating = (decision['risk_rating'] as string) ?? 'UNKNOWN'
+          const isApproval = new Set(['BUY', 'HOLD', 'MONITOR']).has(finalVerdict)
+          const decisionItem: FeedItem = {
+            id: opportunityId,
+            type: isApproval ? 'decision' : 'rejection',
+            ticker,
+            headline: isApproval
+              ? `${finalVerdict} — conviction ${convictionScore}`
+              : `Rejected: ${finalVerdict}`,
+            convictionScore: isApproval ? convictionScore : undefined,
+            riskRating,
+            finalVerdict,
+            rejectionReason: isApproval
+              ? undefined
+              : (decision['rejection_reason'] as string | undefined) ?? finalVerdict,
+            timestamp: Date.now(),
           }
-          addFeedItem(item)
+          addFeedItem(decisionItem)
         }
         break
       }
