@@ -55,19 +55,19 @@ const rawNodes: PipelineNode[] = [
 ]
 
 const rawEdges: Edge[] = [
-  { id: 'e-scanner-signal', source: 'scanner', target: 'signal_detector' },
-  { id: 'e-signal-gate', source: 'signal_detector', target: 'quality_gate' },
-  { id: 'e-gate-buffett', source: 'quality_gate', target: 'buffett' },
-  { id: 'e-gate-munger', source: 'quality_gate', target: 'munger' },
-  { id: 'e-gate-ackman', source: 'quality_gate', target: 'ackman' },
-  { id: 'e-gate-cohen', source: 'quality_gate', target: 'cohen' },
-  { id: 'e-gate-dalio', source: 'quality_gate', target: 'dalio' },
-  { id: 'e-buffett-committee', source: 'buffett', target: 'committee' },
-  { id: 'e-munger-committee', source: 'munger', target: 'committee' },
-  { id: 'e-ackman-committee', source: 'ackman', target: 'committee' },
-  { id: 'e-cohen-committee', source: 'cohen', target: 'committee' },
-  { id: 'e-dalio-committee', source: 'dalio', target: 'committee' },
-  { id: 'e-committee-cio', source: 'committee', target: 'cio' },
+  { id: 'e-scanner-signal', type: 'animated', source: 'scanner', target: 'signal_detector', data: { active: false } },
+  { id: 'e-signal-gate', type: 'animated', source: 'signal_detector', target: 'quality_gate', data: { active: false } },
+  { id: 'e-gate-buffett', type: 'animated', source: 'quality_gate', target: 'buffett', data: { active: false } },
+  { id: 'e-gate-munger', type: 'animated', source: 'quality_gate', target: 'munger', data: { active: false } },
+  { id: 'e-gate-ackman', type: 'animated', source: 'quality_gate', target: 'ackman', data: { active: false } },
+  { id: 'e-gate-cohen', type: 'animated', source: 'quality_gate', target: 'cohen', data: { active: false } },
+  { id: 'e-gate-dalio', type: 'animated', source: 'quality_gate', target: 'dalio', data: { active: false } },
+  { id: 'e-buffett-committee', type: 'animated', source: 'buffett', target: 'committee', data: { active: false } },
+  { id: 'e-munger-committee', type: 'animated', source: 'munger', target: 'committee', data: { active: false } },
+  { id: 'e-ackman-committee', type: 'animated', source: 'ackman', target: 'committee', data: { active: false } },
+  { id: 'e-cohen-committee', type: 'animated', source: 'cohen', target: 'committee', data: { active: false } },
+  { id: 'e-dalio-committee', type: 'animated', source: 'dalio', target: 'committee', data: { active: false } },
+  { id: 'e-committee-cio', type: 'animated', source: 'committee', target: 'cio', data: { active: false } },
 ]
 
 // Compute layout once at module load (not inside render)
@@ -105,13 +105,21 @@ export const usePipelineStore = create<PipelineStore>((set, get) => ({
   },
 
   updateNodeStatus: (nodeId, status, extra) => {
-    set((state) => ({
-      nodes: state.nodes.map((n) =>
-        n.id === nodeId
-          ? { ...n, data: { ...n.data, status, ...extra } }
-          : n
-      ),
-    }))
+    set((state) => {
+      const isRunning = status === 'running'
+      return {
+        nodes: state.nodes.map((n) =>
+          n.id === nodeId
+            ? { ...n, data: { ...n.data, status, ...extra } }
+            : n
+        ),
+        edges: state.edges.map((e) =>
+          e.source === nodeId
+            ? { ...e, data: { ...e.data, active: isRunning } }
+            : e
+        ),
+      }
+    })
   },
 
   addFeedItem: (item) => {
