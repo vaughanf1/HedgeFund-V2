@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** The system discovers investment opportunities before the user has to think about them — a living alpha engine, not a reactive analyzer.
-**Current focus:** Phase 3 COMPLETE — moving to Phase 4: Real-Time Frontend
+**Current focus:** Phase 4 In Progress — animated edges and node polish complete (04-02)
 
 ## Current Position
 
 Phase: 4 of 4 (Real-Time Frontend and Visual Agent Operating System — In progress)
-Plan: 1 of 4 in current phase (04-01 complete)
-Status: In progress — Phase 4 plan 1 executed
-Last activity: 2026-03-25 — Completed 04-01-PLAN.md (Vite SPA scaffold, React Flow graph, Zustand store, SSE hook)
+Plan: 2 of 4 in current phase (04-01, 04-02 complete; 04-03, 04-04 in progress in wave 2)
+Status: In progress — Phase 4 plans 1 and 2 executed
+Last activity: 2026-03-25 — Completed 04-02-PLAN.md (AnimatedFlowEdge, edge active state in store, enhanced node visual polish)
 
-Progress: [███████████░] ~92% (11/12 estimated plans)
+Progress: [████████████] ~96% (12/13 estimated plans)
 
 ## Performance Metrics
 
@@ -83,6 +83,10 @@ Recent decisions affecting current work:
 - [04-01 D-3]: nodeTypes defined at PipelineGraph module level to prevent React Flow node re-registration anti-pattern
 - [04-01 D-4]: dagre layout computed once at pipelineStore module load, not per render
 - [04-01 D-5]: StageNode suppresses target Handle for scanner and source Handle for cio (entry/sink nodes)
+- [04-02 D-1]: animateMotion reuses same edgePath from getSmoothStepPath — dot follows exact rendered edge geometry
+- [04-02 D-2]: Edge active state toggled inside updateNodeStatus (not separate action) — atomic node+edge update in single set() call
+- [04-02 D-3]: GateNode running state yellow-500 (not blue) — visually distinguishes gate filtering from agent analysis
+- [04-02 D-4]: StageNode sub-info keyed by node id (scanner/committee/cio) — each stage shows domain-appropriate context
 
 ### Pending Todos
 
@@ -100,6 +104,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25
-Stopped at: Completed 04-01-PLAN.md — Vite SPA scaffold, React Flow 10-node pipeline graph with dagre LR layout, Zustand store, SSE hook, three-panel Bloomberg dark dashboard. Phase 4 plan 1 of 4 done.
+Last session: 2026-03-25T22:50:28Z
+Stopped at: Completed 04-02-PLAN.md — AnimatedFlowEdge with SVG animateMotion, edge active state in Zustand updateNodeStatus, enhanced AgentNode/GateNode/StageNode with status dots, glow effects, CSS transitions. Phase 4 plan 2 of 4 done.
 Resume file: None
