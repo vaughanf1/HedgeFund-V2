@@ -34,6 +34,7 @@ import anthropic
 
 from app.agents.loader import PersonaLoader
 from app.agents.partitioner import DataPartitioner
+from app.agents.schemas import AgentVerdict
 from app.llm.exceptions import BudgetExceededError, LLMCallError
 from app.llm.spend_tracker import (
     DEFAULT_DAILY_LIMIT_USD,
@@ -219,3 +220,108 @@ async def llm_call_with_persona(
     )
     result["persona"] = persona_name
     return result
+
+
+async def llm_call_with_persona_parsed(
+    persona_name: str,
+    data_context: dict[str, Any],
+    redis_client: Any,
+    model: str = DEFAULT_MODEL,
+    daily_limit_usd: float = DEFAULT_DAILY_LIMIT_USD,
+    max_tokens: int = 1024,
+) -> AgentVerdict:
+    """Like llm_call_with_persona but uses messages.parse() for structured output.
+
+    Returns a validated AgentVerdict Pydantic object instead of raw text.
+    Budget gate is enforced before the API call using the same pre-flight
+    estimate as ``llm_call``. Exact spend is recorded after the call.
+
+    Args:
+        persona_name: One of ``{"buffett", "munger", "ackman", "cohen", "dalio"}``.
+        data_context: Full data dict. The partitioner strips fields the persona
+            is not permitted to see before the prompt is rendered.
+        redis_client: An async Redis client (``redis.asyncio.Redis``).
+        model: Anthropic model identifier (must be in ``COST_PER_MTOK``).
+        daily_limit_usd: Daily spend ceiling in USD.
+        max_tokens: Maximum tokens in the model response.
+
+    Returns:
+        A validated ``AgentVerdict`` Pydantic instance.
+
+    Raises:
+        BudgetExceededError: If the daily budget would be exceeded.
+        LLMCallError: If the API call fails or structured output parsing fails.
+        ValueError: If *persona_name* is not recognised.
+    """
+    tracker = SpendTracker(redis_client, daily_limit_usd=daily_limit_usd)
+
+    # Pre-flight budget check
+    within_budget, remaining = await tracker.async_check_budget(_PREFLIGHT_ESTIMATE_USD)
+    if not within_budget:
+        current = await tracker.async_get_current_spend()
+        raise BudgetExceededError(
+            current_spend_usd=current,
+            limit_usd=daily_limit_usd,
+            projected_cost_usd=_PREFLIGHT_ESTIMATE_USD,
+        )
+
+    logger.info(
+        "Making parsed LLM call: persona=%s, model=%s, remaining_budget=$%.4f",
+        persona_name,
+        model,
+        remaining,
+    )
+
+    # Partition data and render persona prompt
+    partitioner = DataPartitioner()
+    loader = PersonaLoader()
+    partitioned = partitioner.partition_raw(persona_name, data_context)
+    system_prompt = loader.render_persona(persona_name, partitioned)
+
+    # Make the structured output API call
+    try:
+        client = anthropic.AsyncAnthropic()
+        response = await client.messages.parse(
+            model=model,
+            max_tokens=max_tokens,
+            system=system_prompt,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Analyse the data in your system prompt and return your verdict.",
+                }
+            ],
+            output_format=AgentVerdict,
+        )
+    except anthropic.APIError as exc:
+        raise LLMCallError(
+            f"Anthropic API error during {model} parsed call for {persona_name}: {exc}",
+            model=model,
+            original_error=exc,
+        ) from exc
+    except Exception as exc:
+        raise LLMCallError(
+            f"Unexpected error during {model} parsed call for {persona_name}: {exc}",
+            model=model,
+            original_error=exc,
+        ) from exc
+
+    # Extract usage and calculate exact cost
+    input_tokens: int = response.usage.input_tokens
+    output_tokens: int = response.usage.output_tokens
+    cost_usd = calculate_call_cost(model, input_tokens, output_tokens)
+
+    # Record exact spend
+    await tracker.async_record_spend(cost_usd)
+
+    logger.info(
+        "Parsed LLM call complete: persona=%s, model=%s, tokens=%d/%d, cost=$%.6f",
+        persona_name,
+        model,
+        input_tokens,
+        output_tokens,
+        cost_usd,
+    )
+
+    # response.parsed_output is the validated AgentVerdict Pydantic instance
+    return response.parsed_output
