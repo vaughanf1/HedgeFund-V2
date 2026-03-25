@@ -27,28 +27,28 @@
 
 ### Investor Agents
 
-- [ ] **AGNT-01**: Warren Buffett agent evaluates opportunities through fundamental/value lens
-- [ ] **AGNT-02**: Charlie Munger agent evaluates through mental models and quality filters
-- [ ] **AGNT-03**: Bill Ackman agent evaluates through activist/concentrated bet lens
-- [ ] **AGNT-04**: Steve Cohen agent evaluates through short-term flow and momentum lens
-- [ ] **AGNT-05**: Ray Dalio agent evaluates through macro/cycle/risk parity lens
-- [ ] **AGNT-06**: Each agent assigns independent score (0-100), conviction level, structured reasoning, risks, upside scenario, and time horizon
-- [ ] **AGNT-07**: Agents receive different data subsets to prevent sycophantic consensus (information asymmetry)
-- [ ] **AGNT-08**: All five agents run in parallel for each opportunity
+- [x] **AGNT-01**: Warren Buffett agent evaluates opportunities through fundamental/value lens
+- [x] **AGNT-02**: Charlie Munger agent evaluates through mental models and quality filters
+- [x] **AGNT-03**: Bill Ackman agent evaluates through activist/concentrated bet lens
+- [x] **AGNT-04**: Steve Cohen agent evaluates through short-term flow and momentum lens
+- [x] **AGNT-05**: Ray Dalio agent evaluates through macro/cycle/risk parity lens
+- [x] **AGNT-06**: Each agent assigns independent score (0-100), conviction level, structured reasoning, risks, upside scenario, and time horizon
+- [x] **AGNT-07**: Agents receive different data subsets to prevent sycophantic consensus (information asymmetry)
+- [x] **AGNT-08**: All five agents run in parallel for each opportunity
 
 ### 10X / Asymmetric Layer
 
-- [ ] **ASYM-01**: Dedicated analysis layer identifies asymmetric bets with 5x-10x potential
-- [ ] **ASYM-02**: Output includes catalyst justification and probability vs payoff framing
-- [ ] **ASYM-03**: Risks and required conditions for upside scenario are explicitly flagged
+- [x] **ASYM-01**: Dedicated analysis layer identifies asymmetric bets with 5x-10x potential
+- [x] **ASYM-02**: Output includes catalyst justification and probability vs payoff framing
+- [x] **ASYM-03**: Risks and required conditions for upside scenario are explicitly flagged
 
 ### Committee + CIO Decision
 
-- [ ] **CIO-01**: Committee aggregates all agent outputs per opportunity
-- [ ] **CIO-02**: Committee identifies consensus and conflict across agents
-- [ ] **CIO-03**: Agent influence is context-weighted (e.g. Dalio weighted higher in macro regimes)
-- [ ] **CIO-04**: CIO produces final output: conviction score, suggested allocation %, time horizon, risk rating, key catalysts, kill conditions
-- [ ] **CIO-05**: Top opportunities are ranked and surfaced to the user
+- [x] **CIO-01**: Committee aggregates all agent outputs per opportunity
+- [x] **CIO-02**: Committee identifies consensus and conflict across agents
+- [x] **CIO-03**: Agent influence is context-weighted (e.g. Dalio weighted higher in macro regimes)
+- [x] **CIO-04**: CIO produces final output: conviction score, suggested allocation %, time horizon, risk rating, key catalysts, kill conditions
+- [x] **CIO-05**: Top opportunities are ranked and surfaced to the user
 
 ### Visual Agent Operating System
 
@@ -134,22 +134,22 @@
 | SGNL-08 | Phase 2 | Complete |
 | VIS-01 | Phase 2 | Complete |
 | VIS-04 | Phase 2 | Complete |
-| AGNT-01 | Phase 3 | Pending |
-| AGNT-02 | Phase 3 | Pending |
-| AGNT-03 | Phase 3 | Pending |
-| AGNT-04 | Phase 3 | Pending |
-| AGNT-05 | Phase 3 | Pending |
-| AGNT-06 | Phase 3 | Pending |
-| AGNT-07 | Phase 3 | Pending |
-| AGNT-08 | Phase 3 | Pending |
-| ASYM-01 | Phase 3 | Pending |
-| ASYM-02 | Phase 3 | Pending |
-| ASYM-03 | Phase 3 | Pending |
-| CIO-01 | Phase 3 | Pending |
-| CIO-02 | Phase 3 | Pending |
-| CIO-03 | Phase 3 | Pending |
-| CIO-04 | Phase 3 | Pending |
-| CIO-05 | Phase 3 | Pending |
+| AGNT-01 | Phase 3 | Complete |
+| AGNT-02 | Phase 3 | Complete |
+| AGNT-03 | Phase 3 | Complete |
+| AGNT-04 | Phase 3 | Complete |
+| AGNT-05 | Phase 3 | Complete |
+| AGNT-06 | Phase 3 | Complete |
+| AGNT-07 | Phase 3 | Complete |
+| AGNT-08 | Phase 3 | Complete |
+| ASYM-01 | Phase 3 | Complete |
+| ASYM-02 | Phase 3 | Complete |
+| ASYM-03 | Phase 3 | Complete |
+| CIO-01 | Phase 3 | Complete |
+| CIO-02 | Phase 3 | Complete |
+| CIO-03 | Phase 3 | Complete |
+| CIO-04 | Phase 3 | Complete |
+| CIO-05 | Phase 3 | Complete |
 | UI-01 | Phase 4 | Pending |
 | UI-02 | Phase 4 | Pending |
 | UI-03 | Phase 4 | Pending |
@@ -172,4 +172,4 @@
 
 ---
 *Requirements defined: 2026-03-25*
-*Last updated: 2026-03-25 — Phase 2 requirements marked Complete*
+*Last updated: 2026-03-25 — Phase 3 requirements marked Complete*
