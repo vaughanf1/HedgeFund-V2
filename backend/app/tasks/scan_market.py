@@ -21,6 +21,7 @@ from app.signals.detectors.price_breakout import detect_price_breakout
 from app.signals.detectors.sector_momentum import detect_sector_momentum
 from app.signals.detectors.volume_spike import detect_volume_spike
 from app.signals.quality_gate import passes_gate
+from app.signals.queue import enqueue_opportunity
 from app.signals.scorer import compute_composite_score
 from app.tasks.celery_app import app
 
@@ -43,6 +44,7 @@ def run(self) -> dict:  # type: ignore[override]
     watchlist = _parse_watchlist()
     passed = 0
     rejected = 0
+    enqueued_count = 0
     errors: list[str] = []
 
     with SyncSessionLocal() as session:
@@ -71,6 +73,23 @@ def run(self) -> dict:  # type: ignore[override]
 
                 if gate_passed:
                     passed += 1
+                    enqueued = enqueue_opportunity(
+                        r,
+                        ticker,
+                        {
+                            "ticker": ticker,
+                            "composite_score": composite,
+                            "signals": raw_signals,
+                            "detected_at": detected_at.isoformat(),
+                        },
+                    )
+                    if enqueued:
+                        enqueued_count += 1
+                        logger.info("scan_market: enqueued opportunity — %s", ticker)
+                    else:
+                        logger.info(
+                            "scan_market: duplicate — skipped enqueue for %s", ticker
+                        )
                 else:
                     rejected += 1
 
@@ -105,10 +124,11 @@ def run(self) -> dict:  # type: ignore[override]
         logger.warning("scan_market: Redis instrumentation write failed — %s", exc)
 
     logger.info(
-        "scan_market complete — tickers=%d passed=%d rejected=%d errors=%d pass_rate=%.2f",
+        "scan_market complete — tickers=%d passed=%d rejected=%d enqueued=%d errors=%d pass_rate=%.2f",
         total,
         passed,
         rejected,
+        enqueued_count,
         len(errors),
         pass_rate,
     )
@@ -117,5 +137,6 @@ def run(self) -> dict:  # type: ignore[override]
         "tickers": total,
         "passed": passed,
         "rejected": rejected,
+        "enqueued": enqueued_count,
         "errors": errors,
     }
