@@ -34,12 +34,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. The agent prompt library has versioned persona files with explicit data partitioning rules (Buffett gets fundamentals only; Cohen gets price action only) that prevent sycophantic consensus by design
   5. LLM call wrapper is wired with cost logging and a hard daily spend limit before any agent makes a real call
 
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 01-01: Docker Compose service definitions, healthchecks, Alembic migration bootstrap
-- [ ] 01-02: Polygon.io and FMP data connectors with modular interface and normalization layer
-- [ ] 01-03: Agent prompt library — five investor personas with information asymmetry and divergence-enforcing structure; LLM wrapper with cost controls
+- [ ] 01-01-PLAN.md — Docker Compose stack, FastAPI skeleton, TimescaleDB schema via Alembic, Celery app with beat schedule
+- [ ] 01-02-PLAN.md — Massive.com and FMP data connectors with abstract interface, FinancialSnapshot schema, Celery ingest tasks
+- [ ] 01-03-PLAN.md — Five investor persona files with data partitioning, DataPartitioner, LLM wrapper with Redis cost gate
 
 ---
 
@@ -76,9 +76,9 @@ Plans:
 **Requirements**: AGNT-01, AGNT-02, AGNT-03, AGNT-04, AGNT-05, AGNT-06, AGNT-07, AGNT-08, ASYM-01, ASYM-02, ASYM-03, CIO-01, CIO-02, CIO-03, CIO-04, CIO-05
 
 **Success Criteria** (what must be TRUE):
-  1. A qualifying opportunity triggers all five agents (Buffett, Munger, Ackman, Cohen, Dalio) running in parallel; each produces an independent score (0–100), conviction level, structured reasoning, identified risks, upside scenario, and time horizon
+  1. A qualifying opportunity triggers all five agents (Buffett, Munger, Ackman, Cohen, Dalio) running in parallel; each produces an independent score (0-100), conviction level, structured reasoning, identified risks, upside scenario, and time horizon
   2. Agents demonstrably disagree — the inter-agent variance score is non-trivial on contested opportunities; no committee round is accepted if all five agents converge to within a narrow band
-  3. The 10X asymmetric layer runs and flags opportunities with 5x–10x potential, including catalyst justification, probability-vs-payoff framing, and required upside conditions
+  3. The 10X asymmetric layer runs and flags opportunities with 5x-10x potential, including catalyst justification, probability-vs-payoff framing, and required upside conditions
   4. The committee aggregates all five verdicts with context-weighted influence (e.g. Dalio weighted higher in macro regimes), identifies consensus and dissent, and the CIO produces a final output with conviction score, suggested allocation %, time horizon, risk rating, key catalysts, and kill conditions
   5. Every pipeline state transition emits a Redis event (`AGENT_STARTED`, `AGENT_COMPLETE`, `COMMITTEE_COMPLETE`, `DECISION_MADE`) that is consumable by downstream SSE subscribers
 
@@ -101,10 +101,10 @@ Plans:
 **Requirements**: UI-01, UI-02, UI-03, UI-04, FEED-01, FEED-02, FEED-03, OUT-01, OUT-02, OUT-03, OUT-04, VIS-02, VIS-03, INFR-03
 
 **Success Criteria** (what must be TRUE):
-  1. The React Flow agent graph shows the full pipeline (scanner → signal detector → quality gate → five agents → committee → CIO) and every node updates its visual state in real time as SSE events arrive, without requiring a page refresh
-  2. Opportunities animate visually through pipeline states (detected → validating → analyzing → debating → scored → approved/rejected) with clear state transitions on agent nodes and connection edges
-  3. The live opportunity feed shows new detections, trending ideas, highest conviction plays, and recently rejected ideas with rejection reasons — all updating in real time
-  4. The final output dashboard ranks the top 5–10 opportunities and each entry shows conviction score, risk rating, expected upside, time horizon, key catalysts, per-agent score breakdown, and CIO summary
+  1. The React Flow agent graph shows the full pipeline (scanner -> signal detector -> quality gate -> five agents -> committee -> CIO) and every node updates its visual state in real time as SSE events arrive, without requiring a page refresh
+  2. Opportunities animate visually through pipeline states (detected -> validating -> analyzing -> debating -> scored -> approved/rejected) with clear state transitions on agent nodes and connection edges
+  3. The live opportunity feed shows new detections, trending ideas, highest conviction plays, and recently rejected ideas with rejection reasons -- all updating in real time
+  4. The final output dashboard ranks the top 5-10 opportunities and each entry shows conviction score, risk rating, expected upside, time horizon, key catalysts, per-agent score breakdown, and CIO summary
   5. Pipeline stages (filtered opportunities, agent outputs with scoring breakdowns) are inspectable via detail views without leaving the dashboard; SSE reconnects automatically if the connection drops
 
 **Plans**: TBD
@@ -120,15 +120,15 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infrastructure and Data Foundation | 0/3 | Not started | - |
+| 1. Infrastructure and Data Foundation | 0/3 | Planned | - |
 | 2. Signal Detection and Opportunity Pipeline | 0/3 | Not started | - |
 | 3. Agent Analysis Engine | 0/4 | Not started | - |
 | 4. Real-Time Frontend and Visual Agent Operating System | 0/4 | Not started | - |
 
 ---
 *Roadmap created: 2026-03-25*
-*Last updated: 2026-03-25 after initial creation*
+*Last updated: 2026-03-25 after Phase 1 planning*
