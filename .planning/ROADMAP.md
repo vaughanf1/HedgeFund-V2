@@ -107,13 +107,13 @@ Plans:
   4. The final output dashboard ranks the top 5-10 opportunities and each entry shows conviction score, risk rating, expected upside, time horizon, key catalysts, per-agent score breakdown, and CIO summary
   5. Pipeline stages (filtered opportunities, agent outputs with scoring breakdowns) are inspectable via detail views without leaving the dashboard; SSE reconnects automatically if the connection drops
 
-**Plans**: TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 04-01: FastAPI SSE endpoint subscribing to Redis channels; static React Flow graph layout with all pipeline nodes; Bloomberg dark aesthetic scaffolding (INFR-02, INFR-03, UI-01)
-- [ ] 04-02: Dynamic node state driven by SSE events; animated state transitions; connection direction indicators (UI-02, UI-03, UI-04)
-- [ ] 04-03: Live opportunity feed (FEED-01, FEED-02, FEED-03); pipeline stage inspection views for filtered opportunities and agent outputs (VIS-02, VIS-03)
-- [ ] 04-04: Final output dashboard — ranked opportunity list with full breakdown per opportunity including per-agent scores and CIO recommendation (OUT-01 through OUT-04)
+- [ ] 04-01-PLAN.md — Scaffold Vite SPA, Tailwind v4 + shadcn/ui dark theme, Zustand store, SSE hook, dagre-laid-out React Flow pipeline graph, three-panel Bloomberg layout (INFR-02, INFR-03, UI-01)
+- [ ] 04-02-PLAN.md — Animated flow edges, status-driven node transitions (idle/running/complete/error), visual polish with glow effects and CSS transitions (UI-02, UI-03, UI-04)
+- [ ] 04-03-PLAN.md — Live opportunity feed with trending/recent/rejected sections, slide-over inspection Sheet with per-agent verdict panels (FEED-01, FEED-02, FEED-03, VIS-02, VIS-03)
+- [ ] 04-04-PLAN.md — Ranked output dashboard with OpportunityCards showing conviction, risk, catalysts, per-agent breakdown, CIO summary; REST hydration + SSE updates (OUT-01, OUT-02, OUT-03, OUT-04)
 
 ---
 
