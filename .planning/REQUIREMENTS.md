@@ -7,12 +7,12 @@
 
 ### Data Pipeline
 
-- [ ] **DATA-01**: System ingests real-time and recent market data (price, volume, market movers) from Polygon.io/Massive.com API
-- [ ] **DATA-02**: System ingests fundamental data (P/E, revenue, earnings, balance sheet) from Financial Modeling Prep
-- [ ] **DATA-03**: System ingests insider trades and institutional holdings (13F filings) from Financial Modeling Prep
-- [ ] **DATA-04**: System ingests news headlines and article summaries tied to tickers from Polygon news API
-- [ ] **DATA-05**: All ingested data is normalized into a unified schema before agents consume it
-- [ ] **DATA-06**: Data connectors are modular and replaceable without changing downstream logic
+- [x] **DATA-01**: System ingests real-time and recent market data (price, volume, market movers) from Polygon.io/Massive.com API
+- [x] **DATA-02**: System ingests fundamental data (P/E, revenue, earnings, balance sheet) from Financial Modeling Prep
+- [x] **DATA-03**: System ingests insider trades and institutional holdings (13F filings) from Financial Modeling Prep
+- [x] **DATA-04**: System ingests news headlines and article summaries tied to tickers from Polygon news API
+- [x] **DATA-05**: All ingested data is normalized into a unified schema before agents consume it
+- [x] **DATA-06**: Data connectors are modular and replaceable without changing downstream logic
 
 ### Signal Detection
 
@@ -79,7 +79,7 @@
 
 ### Infrastructure
 
-- [ ] **INFR-01**: All services run via Docker Compose with a single `docker-compose up` command
+- [x] **INFR-01**: All services run via Docker Compose with a single `docker-compose up` command
 - [ ] **INFR-02**: Dark mode, premium aesthetic (Bloomberg x Palantir inspired)
 - [ ] **INFR-03**: UI feels real-time via SSE updates from backend to frontend
 
@@ -116,13 +116,13 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 1 | Pending |
-| DATA-02 | Phase 1 | Pending |
-| DATA-03 | Phase 1 | Pending |
-| DATA-04 | Phase 1 | Pending |
-| DATA-05 | Phase 1 | Pending |
-| DATA-06 | Phase 1 | Pending |
-| INFR-01 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Complete |
+| DATA-02 | Phase 1 | Complete |
+| DATA-03 | Phase 1 | Complete |
+| DATA-04 | Phase 1 | Complete |
+| DATA-05 | Phase 1 | Complete |
+| DATA-06 | Phase 1 | Complete |
+| INFR-01 | Phase 1 | Complete |
 | INFR-02 | Phase 1 | Pending |
 | SGNL-01 | Phase 2 | Pending |
 | SGNL-02 | Phase 2 | Pending |
