@@ -6,7 +6,7 @@ import {
   applyNodeChanges,
 } from '@xyflow/react'
 import { getLayoutedElements } from '@/lib/dagre'
-import type { FeedItem } from '@/types/pipeline'
+import type { FeedItem, Opportunity } from '@/types/pipeline'
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -19,17 +19,8 @@ export interface PipelineNodeData extends Record<string, unknown> {
   conviction?: number
 }
 
-// Re-export FeedItem from types for convenience
-export type { FeedItem }
-
-export interface Opportunity {
-  opportunityId: string
-  convictionScore: number
-  suggestedAllocationPct: number
-  finalVerdict: string
-  riskRating: string
-  decidedAt: string
-}
+// Re-export shared types for convenience
+export type { FeedItem, Opportunity }
 
 type PipelineNode = Node<PipelineNodeData>
 
@@ -66,6 +57,15 @@ const rawEdges: Edge[] = [
 
 // Compute layout once at module load (not inside render)
 const { nodes: initialNodes, edges: initialEdges } = getLayoutedElements(rawNodes, rawEdges, 'LR')
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+/** Sort opportunities by convictionScore descending, cap at 10 */
+function sortAndCap(rankings: Opportunity[]): Opportunity[] {
+  return [...rankings]
+    .sort((a, b) => b.convictionScore - a.convictionScore)
+    .slice(0, 10)
+}
 
 // ─── Store ──────────────────────────────────────────────────────────────────
 
@@ -125,8 +125,9 @@ export const usePipelineStore = create<PipelineStore>((set, get) => ({
     }))
   },
 
+  /** Replace output rankings; sorts by convictionScore desc, caps at 10 */
   setOutputRankings: (rankings) => {
-    set({ outputRankings: rankings })
+    set({ outputRankings: sortAndCap(rankings) })
   },
 
   setSelectedOpportunity: (id) => {
@@ -173,11 +174,14 @@ export const usePipelineStore = create<PipelineStore>((set, get) => ({
         const decision = data['decision'] as Record<string, unknown> | undefined
         const ticker = (data['ticker'] as string) ?? 'UNKNOWN'
         const opportunityId = (data['opportunity_id'] as string) ?? crypto.randomUUID()
+
         if (decision) {
           const finalVerdict = (decision['final_verdict'] as string) ?? 'UNKNOWN'
           const convictionScore = Number(decision['conviction_score'] ?? 0)
           const riskRating = (decision['risk_rating'] as string) ?? 'UNKNOWN'
           const isApproval = new Set(['BUY', 'HOLD', 'MONITOR']).has(finalVerdict)
+
+          // Build FeedItem for the activity feed
           const decisionItem: FeedItem = {
             id: opportunityId,
             type: isApproval ? 'decision' : 'rejection',
@@ -194,6 +198,40 @@ export const usePipelineStore = create<PipelineStore>((set, get) => ({
             timestamp: Date.now(),
           }
           addFeedItem(decisionItem)
+
+          // Build Opportunity and insert/replace in outputRankings
+          const rawVerdicts = data['verdicts'] as Array<Record<string, unknown>> | undefined
+          const agentScores = (rawVerdicts ?? []).map((v) => ({
+            persona: (v['persona'] as string) ?? '',
+            verdict: (v['verdict'] as string) ?? '',
+            confidence: Number(v['confidence'] ?? v['confidence_score'] ?? 0),
+            rationale: v['rationale'] as string | undefined,
+          }))
+
+          const opportunity: Opportunity = {
+            opportunityId,
+            ticker,
+            convictionScore,
+            suggestedAllocationPct: Number(decision['suggested_allocation_pct'] ?? 0),
+            finalVerdict,
+            riskRating,
+            decidedAt: (decision['decided_at'] as string) ?? new Date().toISOString(),
+            agentScores,
+            cioSummary: decision['summary'] as string | undefined,
+            keyCatalysts: decision['key_catalysts'] as string[] | undefined,
+            timeHorizon: decision['time_horizon'] as string | undefined,
+            expectedUpside: decision['expected_upside'] != null
+              ? Number(decision['expected_upside'])
+              : undefined,
+          }
+
+          // Insert or replace existing opportunity, then re-sort and cap at 10
+          set((state) => {
+            const filtered = state.outputRankings.filter(
+              (o) => o.opportunityId !== opportunityId
+            )
+            return { outputRankings: sortAndCap([opportunity, ...filtered]) }
+          })
         }
         break
       }
