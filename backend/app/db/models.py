@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
-from sqlalchemy import BigInteger, DateTime, Numeric, String, Text
+from sqlalchemy import BigInteger, Boolean, DateTime, Numeric, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -88,3 +88,27 @@ class NewsItem(Base):
     sentiment: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     article_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     source: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+
+
+class DetectedSignal(Base):
+    """Detected trading signals — TimescaleDB hypertable on detected_at."""
+
+    __tablename__ = "detected_signals"
+    __table_args__ = {
+        "timescaledb_hypertable": {"time_column_name": "detected_at"},
+    }
+
+    detected_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), primary_key=True
+    )
+    ticker: Mapped[str] = mapped_column(String(20), primary_key=True)
+    signal_type: Mapped[str] = mapped_column(String(50), primary_key=True)
+    score: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
+    composite_score: Mapped[Optional[Decimal]] = mapped_column(Numeric, nullable=True)
+    passed_gate: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
+    )
+    detail: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    source: Mapped[str] = mapped_column(
+        String(50), nullable=False, default="scanner"
+    )
