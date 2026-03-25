@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 
 ## Current Position
 
-Phase: 3 of 4 (Agent Analysis Engine — IN PROGRESS)
-Plan: 4 of 4 in current phase (03-04 complete; 03-03 parallel)
-Status: Wave 3 executing (03-03 parallel; 03-04 complete)
-Last activity: 2026-03-25 — Completed 03-04-PLAN (SSE event stream endpoint, opportunities list + detail API, all three routers registered in main.py)
+Phase: 3 of 4 (Agent Analysis Engine — COMPLETE)
+Plan: 4 of 4 in current phase (03-03 and 03-04 both complete — Wave 3 done)
+Status: Phase 3 complete — all 4 plans executed
+Last activity: 2026-03-25 — Completed 03-03-PLAN (asymmetric scoring, committee aggregation, CIO decision engine, run_committee full pipeline)
 
-Progress: [█████████░] ~75% (9/12 estimated plans)
+Progress: [██████████] ~83% (10/12 estimated plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: ~4 min
-- Total execution time: ~37 min
+- Total execution time: ~40 min
 
 **By Phase:**
 
@@ -29,11 +29,11 @@ Progress: [█████████░] ~75% (9/12 estimated plans)
 |-------|-------|-------|----------|
 | Phase 1 | 3 | ~21 min | ~7 min |
 | Phase 2 | 3 | ~6 min | ~2 min |
-| Phase 3 (so far) | 3+ | ~13 min | ~4 min |
+| Phase 3 | 4 | ~16 min | ~4 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (~2 min), 02-03 (~2 min), 03-01 (~4 min), 03-02 (~4 min)
-- Trend: Stable, accelerating on well-defined tasks
+- Last 5 plans: 02-03 (~2 min), 03-01 (~4 min), 03-02 (~4 min), 03-04 (~5 min), 03-03 (~3 min)
+- Trend: Stable, ~4 min average for well-defined Phase 3 tasks
 
 *Updated after each plan completion*
 
@@ -72,6 +72,11 @@ Recent decisions affecting current work:
 - [03-02 D-3]: run_committee deferred-imports variance module — avoids circular import between tasks and analysis packages at module load
 - [03-04 D-1]: EventSourceResponse wraps async generator; client reconnect handled by browser EventSource API (Phase 4 scope)
 - [03-04 D-2]: risk_rating extracted from decision_json blob via json.loads in OpportunitySummary — avoids separate DB column; graceful UNKNOWN fallback
+- [03-03 D-1]: fan_out stores opportunity dict in Redis (opportunity:{id}, TTL=24h) — run_committee reads it rather than relying on task arguments or re-queuing
+- [03-03 D-2]: Graceful degradation in run_committee when Redis opportunity key missing — reconstructs minimal dict from opportunity_id rather than crashing
+- [03-03 D-3]: Low variance warning does not block pipeline — committee proceeds even if agents converged sycophantically; variance is informational
+- [03-03 D-4]: Asymmetric 1.5x allocation multiplier capped at 10% — prevents runaway allocation on highly asymmetric plays
+- [03-03 D-5]: SPLIT consensus with conviction>=60 maps to MONITOR not PASS — acknowledges partial conviction without committing capital
 
 ### Pending Todos
 
@@ -90,5 +95,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-03-25
-Stopped at: Completed 03-04-PLAN.md — SSE event stream endpoint, opportunities list + detail API, all routers registered. Wave 3 plan 03-04 complete.
+Stopped at: Completed 03-03-PLAN.md — asymmetric scoring layer, regime-weighted committee aggregation, deterministic CIO decision engine, full run_committee pipeline. Phase 3 complete (all 4 plans done).
 Resume file: None
