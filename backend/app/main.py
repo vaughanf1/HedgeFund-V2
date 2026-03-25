@@ -4,6 +4,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.routers.events import router as events_router
+from app.routers.opportunities import router as opportunities_router
 from app.routers.signals import router as signals_router
 
 
@@ -26,3 +28,5 @@ async def health() -> dict:
 
 
 app.include_router(signals_router)
+app.include_router(events_router)
+app.include_router(opportunities_router)
