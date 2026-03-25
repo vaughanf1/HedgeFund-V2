@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** The system discovers investment opportunities before the user has to think about them — a living alpha engine, not a reactive analyzer.
-**Current focus:** Phase 2 COMPLETE — moving to Phase 3: Agent Analysis and Recommendation
+**Current focus:** Phase 3 in progress — Agent Analysis Engine
 
 ## Current Position
 
-Phase: 2 of 4 (Signal Detection and Opportunity Pipeline — COMPLETE)
-Plan: 3 of 3 in current phase (phase complete)
-Status: Phase complete — ready for Phase 3
-Last activity: 2026-03-25 — Completed 02-03-PLAN (Redis dedup queue, enqueue_opportunity, GET /api/v1/signals endpoints)
+Phase: 3 of 4 (Agent Analysis Engine — IN PROGRESS)
+Plan: 1 of 4 in current phase (03-01 complete)
+Status: Executing Wave 2 next (plan 03-02)
+Last activity: 2026-03-25 — Completed 03-01-PLAN (Pydantic schemas, LangGraph graph, structured output wrapper, event publisher)
 
-Progress: [██████░░░░] ~50% (6/12 estimated plans)
+Progress: [███████░░░] ~58% (7/12 estimated plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: ~4 min
-- Total execution time: ~25 min
+- Total execution time: ~28 min
 
 **By Phase:**
 
@@ -64,6 +64,8 @@ Recent decisions affecting current work:
 - [02-02 D-02-02-4]: Redis instrumentation failures logged as warnings, not errors
 - [02-03]: Dedup is per-ticker (not per-signal-type) — Phase 3 agents analyze full ticker opportunity via BLPOP
 - [02-03]: json.dumps with default=str in enqueue_opportunity — safety net for Decimal/datetime edge cases in signal detail dicts — observability must not block scan correctness
+- [03-01 D-03-01-1]: AgentVerdict schema imports used at top of wrapper.py (not TYPE_CHECKING guard) — schemas are used at runtime by messages.parse()
+- [03-01 D-03-01-2]: publisher.py uses sync redis (not async) — called from synchronous Celery tasks; SSE consumer (Plan 03-04) uses redis.asyncio
 
 ### Pending Todos
 
@@ -81,6 +83,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25T15:55:14Z
-Stopped at: Completed 02-03-PLAN.md — Redis dedup queue, enqueue_opportunity wired into scan_market, GET /api/v1/signals endpoints. Phase 2 COMPLETE.
+Last session: 2026-03-25
+Stopped at: Completed 03-01-PLAN.md — Pydantic schemas, LangGraph graph, structured output wrapper, event publisher. Wave 1 complete.
 Resume file: None

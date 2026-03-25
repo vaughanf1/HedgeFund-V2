@@ -82,13 +82,13 @@ Plans:
   4. The committee aggregates all five verdicts with context-weighted influence (e.g. Dalio weighted higher in macro regimes), identifies consensus and dissent, and the CIO produces a final output with conviction score, suggested allocation %, time horizon, risk rating, key catalysts, and kill conditions
   5. Every pipeline state transition emits a Redis event (`AGENT_STARTED`, `AGENT_COMPLETE`, `COMMITTEE_COMPLETE`, `DECISION_MADE`) that is consumable by downstream SSE subscribers
 
-**Plans**: TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 03-01: Single-agent round-trip proof (one persona end-to-end with LangGraph + Celery task); validate fan-out/fan-in pattern before full build
-- [ ] 03-02: All five persona agents with parallel Celery group fan-out; AgentVerdict persistence; inter-agent variance scoring (AGNT-01 through AGNT-08)
-- [ ] 03-03: 10X asymmetric scoring layer (ASYM-01 through ASYM-03); Committee Aggregator with context-weighted voting; CIO Decision Engine (CIO-01 through CIO-05)
-- [ ] 03-04: Redis event publishing at every pipeline stage; verify all five event types are consumable before Phase 4 begins
+- [ ] 03-01-PLAN.md — Pydantic schemas (AgentVerdict, CommitteeReport, CIODecision), LangGraph per-persona graph, structured output LLM wrapper (messages.parse), Redis event publisher, requirements update
+- [ ] 03-02-PLAN.md — BLPOP consumer, five-agent parallel Celery fan-out with Redis counter fan-in (no Chord), AgentVerdict DB persistence, inter-agent variance scoring (AGNT-01 through AGNT-08)
+- [ ] 03-03-PLAN.md — 10X asymmetric scoring layer (ASYM-01 through ASYM-03), committee aggregator with context-weighted voting, CIO deterministic decision engine (CIO-01 through CIO-05), full run_committee wiring
+- [ ] 03-04-PLAN.md — SSE event stream endpoint (Redis Pub/Sub subscriber), opportunities API endpoints (list ranked by conviction, per-opportunity detail with full breakdown)
 
 ---
 
