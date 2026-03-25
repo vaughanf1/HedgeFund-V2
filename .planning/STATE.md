@@ -5,32 +5,32 @@
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** The system discovers investment opportunities before the user has to think about them — a living alpha engine, not a reactive analyzer.
-**Current focus:** Phase 1 — Infrastructure and Data Foundation
+**Current focus:** Phase 1 complete — Infrastructure and Data Foundation done
 
 ## Current Position
 
 Phase: 1 of 4 (Infrastructure and Data Foundation)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-03-25 — Completed 01-02-PLAN (data ingestion pipeline)
+Plan: 3 of 3 in current phase
+Status: Phase complete
+Last activity: 2026-03-25 — Completed 01-03-PLAN (agent prompt infrastructure)
 
-Progress: [██░░░░░░░░] ~17% (2/12 estimated plans)
+Progress: [███░░░░░░░] ~25% (3/12 estimated plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: ~8 min
-- Total execution time: ~16 min
+- Total plans completed: 3
+- Average duration: ~7 min
+- Total execution time: ~21 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| Phase 1 | 2 | ~16 min | ~8 min |
+| Phase 1 | 3 | ~21 min | ~7 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (~5 min), 01-02 (~3 min)
+- Last 5 plans: 01-01 (~5 min), 01-02 (~3 min), 01-03 (~5 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -50,11 +50,16 @@ Recent decisions affecting current work:
 - [01-02 D-01-02-1]: httpx used instead of polygon-api-client in MassiveConnector — library not in requirements, httpx achieves identical result
 - [01-02 D-01-02-2]: session.merge() for upsert in Celery tasks — correct upsert semantics on TimescaleDB composite PK
 - [01-02 D-01-02-3]: FMP endpoint paths LOW CONFIDENCE — must verify /ratios-ttm, /income-statement, /balance-sheet-statement, /insider-trading, /stock_news against live FMP v3 docs before production use
+- [01-03 D-01-03-1]: TYPE_CHECKING guard for FinancialSnapshot import — parallel execution with 01-02 avoids hard import failure at merge time
+- [01-03 D-01-03-2]: `from __future__ import annotations` in all modules — local Python 3.9 vs container Python 3.12; PEP 563 makes union syntax portable
+- [01-03 D-01-03-3]: Sync + async SpendTracker interface — Celery tasks (sync) and FastAPI routes (async) both need spend tracking
+- [01-03 D-01-03-4]: Conservative pre-flight estimate ($0.003) for budget gate — exact cost unknown pre-call; estimate prevents overrun without over-blocking
 
 ### Pending Todos
 
 - Verify FMP endpoint paths against live FMP v3 API documentation (D-01-02-3)
 - Load-test session.merge() upsert on large OHLCV batches with TimescaleDB hypertable
+- Update COST_PER_MTOK pricing table in spend_tracker.py when Anthropic changes pricing
 
 ### Blockers/Concerns
 
@@ -62,9 +67,10 @@ Recent decisions affecting current work:
 - [Pre-Phase 3]: Celery Chord reliability — PITFALLS.md recommends avoiding Chord for agent fan-out; use individual tasks + Redis counter pattern instead
 - [Pre-Phase 2]: Signal scoring thresholds are empirical — treat as configurable parameters from day one, instrument false-positive rate immediately
 - [01-02]: FMP endpoint paths are low-confidence — validate before first real API run
+- [01-03]: COST_PER_MTOK is hardcoded — consider a staleness-alert test in Phase 3
 
 ## Session Continuity
 
-Last session: 2026-03-25
-Stopped at: Completed 01-02-PLAN.md — data ingestion pipeline (schemas, connectors, Celery tasks)
+Last session: 2026-03-25T14:59:05Z
+Stopped at: Completed 01-03-PLAN.md — agent prompt infrastructure (personas, partitioner, loader, LLM wrapper)
 Resume file: None
