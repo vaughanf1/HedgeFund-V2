@@ -1,0 +1,15 @@
+fastapi==0.115.2
+uvicorn[standard]
+sqlalchemy[asyncio]
+alembic
+asyncpg
+sqlalchemy-timescaledb
+celery[redis]
+redis
+flower
+anthropic==0.40.0
+pydantic>=2.0
+httpx
+tenacity
+python-dotenv
+psycopg2-binary
