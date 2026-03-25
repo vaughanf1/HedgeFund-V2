@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
-from sqlalchemy import BigInteger, Boolean, DateTime, Numeric, String, Text
+from sqlalchemy import BigInteger, Boolean, DateTime, Integer, Numeric, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -112,3 +112,47 @@ class DetectedSignal(Base):
     source: Mapped[str] = mapped_column(
         String(50), nullable=False, default="scanner"
     )
+
+
+class AgentVerdictRecord(Base):
+    """Per-persona agent verdict — TimescaleDB hypertable on analysed_at.
+
+    Composite primary key: (analysed_at, opportunity_id, persona) ensures
+    idempotent upserts and efficient time-range queries per opportunity.
+    """
+
+    __tablename__ = "agent_verdicts"
+    __table_args__ = {
+        "timescaledb_hypertable": {"time_column_name": "analysed_at"},
+    }
+
+    analysed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), primary_key=True
+    )
+    opportunity_id: Mapped[str] = mapped_column(String(100), primary_key=True)
+    persona: Mapped[str] = mapped_column(String(20), primary_key=True)
+    verdict: Mapped[str] = mapped_column(String(10), nullable=False)
+    confidence: Mapped[int] = mapped_column(Integer, nullable=False)
+    verdict_json: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class CIODecisionRecord(Base):
+    """CIO-level investment decision — TimescaleDB hypertable on decided_at.
+
+    Composite primary key: (decided_at, opportunity_id) maps one decision
+    per opportunity per timestamp. Used by Phase 4 portfolio manager.
+    """
+
+    __tablename__ = "cio_decisions"
+    __table_args__ = {
+        "timescaledb_hypertable": {"time_column_name": "decided_at"},
+    }
+
+    decided_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), primary_key=True
+    )
+    opportunity_id: Mapped[str] = mapped_column(String(100), primary_key=True)
+    conviction_score: Mapped[int] = mapped_column(Integer, nullable=False)
+    suggested_allocation_pct: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
+    final_verdict: Mapped[str] = mapped_column(String(10), nullable=False)
+    decision_json: Mapped[str] = mapped_column(Text, nullable=False)
