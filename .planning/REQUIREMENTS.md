@@ -116,60 +116,60 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | — | Pending |
-| DATA-02 | — | Pending |
-| DATA-03 | — | Pending |
-| DATA-04 | — | Pending |
-| DATA-05 | — | Pending |
-| DATA-06 | — | Pending |
-| SGNL-01 | — | Pending |
-| SGNL-02 | — | Pending |
-| SGNL-03 | — | Pending |
-| SGNL-04 | — | Pending |
-| SGNL-05 | — | Pending |
-| SGNL-06 | — | Pending |
-| SGNL-07 | — | Pending |
-| SGNL-08 | — | Pending |
-| AGNT-01 | — | Pending |
-| AGNT-02 | — | Pending |
-| AGNT-03 | — | Pending |
-| AGNT-04 | — | Pending |
-| AGNT-05 | — | Pending |
-| AGNT-06 | — | Pending |
-| AGNT-07 | — | Pending |
-| AGNT-08 | — | Pending |
-| ASYM-01 | — | Pending |
-| ASYM-02 | — | Pending |
-| ASYM-03 | — | Pending |
-| CIO-01 | — | Pending |
-| CIO-02 | — | Pending |
-| CIO-03 | — | Pending |
-| CIO-04 | — | Pending |
-| CIO-05 | — | Pending |
-| UI-01 | — | Pending |
-| UI-02 | — | Pending |
-| UI-03 | — | Pending |
-| UI-04 | — | Pending |
-| FEED-01 | — | Pending |
-| FEED-02 | — | Pending |
-| FEED-03 | — | Pending |
-| OUT-01 | — | Pending |
-| OUT-02 | — | Pending |
-| OUT-03 | — | Pending |
-| OUT-04 | — | Pending |
-| VIS-01 | — | Pending |
-| VIS-02 | — | Pending |
-| VIS-03 | — | Pending |
-| VIS-04 | — | Pending |
-| INFR-01 | — | Pending |
-| INFR-02 | — | Pending |
-| INFR-03 | — | Pending |
+| DATA-01 | Phase 1 | Pending |
+| DATA-02 | Phase 1 | Pending |
+| DATA-03 | Phase 1 | Pending |
+| DATA-04 | Phase 1 | Pending |
+| DATA-05 | Phase 1 | Pending |
+| DATA-06 | Phase 1 | Pending |
+| INFR-01 | Phase 1 | Pending |
+| INFR-02 | Phase 1 | Pending |
+| SGNL-01 | Phase 2 | Pending |
+| SGNL-02 | Phase 2 | Pending |
+| SGNL-03 | Phase 2 | Pending |
+| SGNL-04 | Phase 2 | Pending |
+| SGNL-05 | Phase 2 | Pending |
+| SGNL-06 | Phase 2 | Pending |
+| SGNL-07 | Phase 2 | Pending |
+| SGNL-08 | Phase 2 | Pending |
+| VIS-01 | Phase 2 | Pending |
+| VIS-04 | Phase 2 | Pending |
+| AGNT-01 | Phase 3 | Pending |
+| AGNT-02 | Phase 3 | Pending |
+| AGNT-03 | Phase 3 | Pending |
+| AGNT-04 | Phase 3 | Pending |
+| AGNT-05 | Phase 3 | Pending |
+| AGNT-06 | Phase 3 | Pending |
+| AGNT-07 | Phase 3 | Pending |
+| AGNT-08 | Phase 3 | Pending |
+| ASYM-01 | Phase 3 | Pending |
+| ASYM-02 | Phase 3 | Pending |
+| ASYM-03 | Phase 3 | Pending |
+| CIO-01 | Phase 3 | Pending |
+| CIO-02 | Phase 3 | Pending |
+| CIO-03 | Phase 3 | Pending |
+| CIO-04 | Phase 3 | Pending |
+| CIO-05 | Phase 3 | Pending |
+| UI-01 | Phase 4 | Pending |
+| UI-02 | Phase 4 | Pending |
+| UI-03 | Phase 4 | Pending |
+| UI-04 | Phase 4 | Pending |
+| FEED-01 | Phase 4 | Pending |
+| FEED-02 | Phase 4 | Pending |
+| FEED-03 | Phase 4 | Pending |
+| OUT-01 | Phase 4 | Pending |
+| OUT-02 | Phase 4 | Pending |
+| OUT-03 | Phase 4 | Pending |
+| OUT-04 | Phase 4 | Pending |
+| VIS-02 | Phase 4 | Pending |
+| VIS-03 | Phase 4 | Pending |
+| INFR-03 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 47 total
-- Mapped to phases: 0
-- Unmapped: 47 ⚠️
+- Mapped to phases: 47
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-25*
-*Last updated: 2026-03-25 after initial definition*
+*Last updated: 2026-03-25 — traceability updated after roadmap creation*
