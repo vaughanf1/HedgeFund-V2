@@ -1,0 +1,97 @@
+@import "tailwindcss";
+@import "@xyflow/react/dist/style.css";
+
+@layer base {
+  :root {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    --card: 240 5% 10%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 5% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 213 100% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 240 4% 16%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 4% 27%;
+    --input: 240 4% 16%;
+    --ring: 213 100% 53%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: #0a0a0b;
+    color: hsl(var(--foreground));
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  #root {
+    height: 100dvh;
+    width: 100vw;
+  }
+}
+
+/* Bloomberg React Flow theme overrides */
+.bloomberg-flow {
+  --xy-background-color-default: #0a0a0b;
+  --xy-node-background-color-default: #18181b;
+  --xy-node-border-default: 1px solid #3f3f46;
+  --xy-edge-stroke-default: #3f3f46;
+  --xy-edge-stroke-selected-default: #0A84FF;
+  --xy-handle-background-color-default: #0A84FF;
+  --xy-controls-button-background-color-default: #18181b;
+  --xy-controls-button-color-default: #a1a1aa;
+  --xy-controls-button-border-color-default: #3f3f46;
+  --xy-minimap-background-color-default: #18181b;
+  --xy-attribution-background-color-default: transparent;
+}
+
+.bloomberg-flow .react-flow__attribution {
+  display: none;
+}
+
+.bloomberg-flow .react-flow__controls-button {
+  background: #18181b;
+  border-color: #3f3f46;
+  color: #a1a1aa;
+}
+
+.bloomberg-flow .react-flow__controls-button:hover {
+  background: #27272a;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
