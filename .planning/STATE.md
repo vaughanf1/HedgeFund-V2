@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 ## Current Position
 
 Phase: 2 of 4 (Signal Detection and Opportunity Pipeline)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-03-25 — Completed 02-01-PLAN (DetectedSignal model, three detectors, scan_market task)
+Last activity: 2026-03-25 — Completed 02-02-PLAN (insider cluster, news catalyst, composite scorer, quality gate, wired scan_market)
 
-Progress: [████░░░░░░] ~33% (4/12 estimated plans)
+Progress: [█████░░░░░] ~42% (5/12 estimated plans)
 
 ## Performance Metrics
 
@@ -28,10 +28,10 @@ Progress: [████░░░░░░] ~33% (4/12 estimated plans)
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | Phase 1 | 3 | ~21 min | ~7 min |
-| Phase 2 | 1 | ~2 min | ~2 min |
+| Phase 2 | 2 | ~4 min | ~2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (~5 min), 01-02 (~3 min), 01-03 (~5 min), 02-01 (~2 min)
+- Last 5 plans: 01-01 (~5 min), 01-02 (~3 min), 01-03 (~5 min), 02-01 (~2 min), 02-02 (~2 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -58,6 +58,10 @@ Recent decisions affecting current work:
 - [02-01]: composite_score=None and passed_gate=False on all raw signals — scorer and gate deferred to Plan 02
 - [02-01]: SECTOR_MAP sourced from env as JSON — empty default means sector_momentum silently skips until configured; avoids hardcoded sector assignments
 - [02-01]: SECTOR_MIN_COVERAGE guard at 60% default — prevents momentum signals when peer data is sparse
+- [02-02 D-02-02-1]: INTERVAL uses f-string injection at module load — PostgreSQL INTERVAL does not accept bind parameters
+- [02-02 D-02-02-2]: ILIKE patterns injected as string literals — cannot parameterize ILIKE arrays in PostgreSQL
+- [02-02 D-02-02-3]: Composite denominator = fired-signal weights only — prevents penalizing tickers where fewer detectors fire
+- [02-02 D-02-02-4]: Redis instrumentation failures logged as warnings, not errors — observability must not block scan correctness
 
 ### Pending Todos
 
@@ -75,6 +79,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25T15:45:30Z
-Stopped at: Completed 02-01-PLAN.md — DetectedSignal hypertable, three signal detectors, scan_market Celery task
+Last session: 2026-03-25T15:50:34Z
+Stopped at: Completed 02-02-PLAN.md — insider cluster, news catalyst, composite scorer, quality gate, wired scan_market
 Resume file: None
