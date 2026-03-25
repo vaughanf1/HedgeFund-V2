@@ -5,32 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** The system discovers investment opportunities before the user has to think about them — a living alpha engine, not a reactive analyzer.
-**Current focus:** Phase 1 complete — Infrastructure and Data Foundation done
+**Current focus:** Phase 2 in progress — Signal Detection and Opportunity Pipeline
 
 ## Current Position
 
-Phase: 1 of 4 (Infrastructure and Data Foundation)
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-03-25 — Completed 01-03-PLAN (agent prompt infrastructure)
+Phase: 2 of 4 (Signal Detection and Opportunity Pipeline)
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-03-25 — Completed 02-01-PLAN (DetectedSignal model, three detectors, scan_market task)
 
-Progress: [███░░░░░░░] ~25% (3/12 estimated plans)
+Progress: [████░░░░░░] ~33% (4/12 estimated plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: ~7 min
-- Total execution time: ~21 min
+- Total plans completed: 4
+- Average duration: ~6 min
+- Total execution time: ~23 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | Phase 1 | 3 | ~21 min | ~7 min |
+| Phase 2 | 1 | ~2 min | ~2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (~5 min), 01-02 (~3 min), 01-03 (~5 min)
+- Last 5 plans: 01-01 (~5 min), 01-02 (~3 min), 01-03 (~5 min), 02-01 (~2 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -54,6 +55,9 @@ Recent decisions affecting current work:
 - [01-03 D-01-03-2]: `from __future__ import annotations` in all modules — local Python 3.9 vs container Python 3.12; PEP 563 makes union syntax portable
 - [01-03 D-01-03-3]: Sync + async SpendTracker interface — Celery tasks (sync) and FastAPI routes (async) both need spend tracking
 - [01-03 D-01-03-4]: Conservative pre-flight estimate ($0.003) for budget gate — exact cost unknown pre-call; estimate prevents overrun without over-blocking
+- [02-01]: composite_score=None and passed_gate=False on all raw signals — scorer and gate deferred to Plan 02
+- [02-01]: SECTOR_MAP sourced from env as JSON — empty default means sector_momentum silently skips until configured; avoids hardcoded sector assignments
+- [02-01]: SECTOR_MIN_COVERAGE guard at 60% default — prevents momentum signals when peer data is sparse
 
 ### Pending Todos
 
@@ -71,6 +75,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25T14:59:05Z
-Stopped at: Completed 01-03-PLAN.md — agent prompt infrastructure (personas, partitioner, loader, LLM wrapper)
+Last session: 2026-03-25T15:45:30Z
+Stopped at: Completed 02-01-PLAN.md — DetectedSignal hypertable, three signal detectors, scan_market Celery task
 Resume file: None
