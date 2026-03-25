@@ -4,6 +4,7 @@ from celery import Celery
 from celery.schedules import crontab
 
 REDIS_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
+SCAN_INTERVAL = int(os.environ.get("SCAN_INTERVAL_SECONDS", "900"))
 
 app = Celery(
     "hedgefund",
@@ -35,6 +36,10 @@ app.conf.update(
         "ingest-news": {
             "task": "app.tasks.ingest_news.run",
             "schedule": 900,  # every 15 minutes
+        },
+        "scan-market": {
+            "task": "app.tasks.scan_market.run",
+            "schedule": SCAN_INTERVAL,  # default 900s, configurable via SCAN_INTERVAL_SECONDS
         },
     },
 )
