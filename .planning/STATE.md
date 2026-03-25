@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 ## Current Position
 
 Phase: 3 of 4 (Agent Analysis Engine — IN PROGRESS)
-Plan: 1 of 4 in current phase (03-01 complete)
-Status: Executing Wave 2 next (plan 03-02)
-Last activity: 2026-03-25 — Completed 03-01-PLAN (Pydantic schemas, LangGraph graph, structured output wrapper, event publisher)
+Plan: 2 of 4 in current phase (03-02 complete)
+Status: Executing Wave 3 next (plan 03-03)
+Last activity: 2026-03-25 — Completed 03-02-PLAN (BLPOP consumer, five-agent fan-out, Redis HINCRBY fan-in, variance scoring, AgentVerdictRecord/CIODecisionRecord ORM, migration 0003)
 
-Progress: [███████░░░] ~58% (7/12 estimated plans)
+Progress: [████████░░] ~67% (8/12 estimated plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 8
 - Average duration: ~4 min
-- Total execution time: ~28 min
+- Total execution time: ~32 min
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [███████░░░] ~58% (7/12 estimated plans)
 |-------|-------|-------|----------|
 | Phase 1 | 3 | ~21 min | ~7 min |
 | Phase 2 | 3 | ~6 min | ~2 min |
+| Phase 3 (so far) | 2 | ~8 min | ~4 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (~5 min), 02-01 (~2 min), 02-02 (~2 min), 02-03 (~2 min)
+- Last 5 plans: 02-02 (~2 min), 02-03 (~2 min), 03-01 (~4 min), 03-02 (~4 min)
 - Trend: Stable, accelerating on well-defined tasks
 
 *Updated after each plan completion*
@@ -66,6 +67,9 @@ Recent decisions affecting current work:
 - [02-03]: json.dumps with default=str in enqueue_opportunity — safety net for Decimal/datetime edge cases in signal detail dicts — observability must not block scan correctness
 - [03-01 D-03-01-1]: AgentVerdict schema imports used at top of wrapper.py (not TYPE_CHECKING guard) — schemas are used at runtime by messages.parse()
 - [03-01 D-03-01-2]: publisher.py uses sync redis (not async) — called from synchronous Celery tasks; SSE consumer (Plan 03-04) uses redis.asyncio
+- [03-02 D-1]: TYPE_CHECKING guard for AgentVerdict in variance.py — used only in type hints at runtime; prevents future circular import
+- [03-02 D-2]: nest_asyncio fallback in _run_graph_sync — handles test environments with running event loops
+- [03-02 D-3]: run_committee deferred-imports variance module — avoids circular import between tasks and analysis packages at module load
 
 ### Pending Todos
 
@@ -75,8 +79,8 @@ Recent decisions affecting current work:
 
 ### Blockers/Concerns
 
-- [Pre-Phase 3]: LangGraph + Celery fan-out integration is not well-documented — plan a spike in Plan 03-01 before full implementation
-- [Pre-Phase 3]: Celery Chord reliability — PITFALLS.md recommends avoiding Chord for agent fan-out; use individual tasks + Redis counter pattern instead
+- [Pre-Phase 3 — RESOLVED]: LangGraph + Celery fan-out integration implemented via asyncio.run() bridge in 03-02
+- [Pre-Phase 3 — RESOLVED]: Celery Chord avoided — Redis HINCRBY counter fan-in pattern implemented in 03-02
 - [Pre-Phase 2]: Signal scoring thresholds are empirical — treat as configurable parameters from day one, instrument false-positive rate immediately
 - [01-02]: FMP endpoint paths are low-confidence — validate before first real API run
 - [01-03]: COST_PER_MTOK is hardcoded — consider a staleness-alert test in Phase 3
@@ -84,5 +88,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-03-25
-Stopped at: Completed 03-01-PLAN.md — Pydantic schemas, LangGraph graph, structured output wrapper, event publisher. Wave 1 complete.
+Stopped at: Completed 03-02-PLAN.md — BLPOP consumer, five-agent fan-out, Redis HINCRBY fan-in, variance scoring, ORM models, migration 0003. Wave 2 complete.
 Resume file: None
