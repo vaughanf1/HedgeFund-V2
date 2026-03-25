@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+
+from app.routers.signals import router as signals_router
 
 
 @asynccontextmanager
@@ -19,3 +23,6 @@ app = FastAPI(
 @app.get("/health")
 async def health() -> dict:
     return {"status": "ok", "service": "hedgefund-api"}
+
+
+app.include_router(signals_router)
