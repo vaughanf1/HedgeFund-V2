@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** The system discovers investment opportunities before the user has to think about them — a living alpha engine, not a reactive analyzer.
-**Current focus:** Phase 4 In Progress — animated edges and node polish complete (04-02)
+**Current focus:** Phase 4 In Progress — live feed panel and inspection sheet complete (04-03)
 
 ## Current Position
 
 Phase: 4 of 4 (Real-Time Frontend and Visual Agent Operating System — In progress)
-Plan: 2 of 4 in current phase (04-01, 04-02 complete; 04-03, 04-04 in progress in wave 2)
-Status: In progress — Phase 4 plans 1 and 2 executed
-Last activity: 2026-03-25 — Completed 04-02-PLAN.md (AnimatedFlowEdge, edge active state in store, enhanced node visual polish)
+Plan: 3 of 4 in current phase (04-01, 04-02, 04-03 complete; 04-04 remaining)
+Status: In progress — Phase 4 plans 1, 2, and 3 executed
+Last activity: 2026-03-25 — Completed 04-03-PLAN.md (live opportunity feed, FeedItem, OpportunitySheet, AgentVerdictPanel)
 
-Progress: [████████████] ~96% (12/13 estimated plans)
+Progress: [████████████░] ~97% (13/14 estimated plans)
 
 ## Performance Metrics
 
@@ -87,6 +87,10 @@ Recent decisions affecting current work:
 - [04-02 D-2]: Edge active state toggled inside updateNodeStatus (not separate action) — atomic node+edge update in single set() call
 - [04-02 D-3]: GateNode running state yellow-500 (not blue) — visually distinguishes gate filtering from agent analysis
 - [04-02 D-4]: StageNode sub-info keyed by node id (scanner/committee/cio) — each stage shows domain-appropriate context
+- [04-03 D-1]: FeedItem type discriminates on 'detection'|'decision'|'rejection' — three render paths map to blue/emerald/red color bars
+- [04-03 D-2]: OpportunitySheet rendered inside OpportunityFeed (not App.tsx) — sheet lifecycle co-located with feed; controlled via Zustand selectedOpportunityId
+- [04-03 D-3]: toAgentScore mapper normalises confidence/confidence_score aliases from backend JSON
+- [04-03 D-4]: AGENT_COMPLETE only creates feed item when ticker is present in SSE data
 
 ### Pending Todos
 
@@ -104,6 +108,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25T22:50:28Z
-Stopped at: Completed 04-02-PLAN.md — AnimatedFlowEdge with SVG animateMotion, edge active state in Zustand updateNodeStatus, enhanced AgentNode/GateNode/StageNode with status dots, glow effects, CSS transitions. Phase 4 plan 2 of 4 done.
+Last session: 2026-03-25T22:56:00Z
+Stopped at: Completed 04-03-PLAN.md — Live opportunity feed with three sections, FeedItem cards, OpportunitySheet slide-over with REST API fetch, AgentVerdictPanel per-persona collapsible breakdown with persona colors. Phase 4 plan 3 of 4 done. Only 04-04 (rankings panel) remains.
 Resume file: None
