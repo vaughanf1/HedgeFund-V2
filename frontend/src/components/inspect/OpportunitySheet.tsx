@@ -109,9 +109,8 @@ export function OpportunitySheet() {
   const decision = detail?.decision ?? {}
   // Extract ticker from decision or from compound opportunity_id (ticker:detected_at)
   const rawId = selectedOpportunityId ?? ''
-  const ticker = (decision['ticker'] as string | undefined)
-    ?? (rawId.includes(':') ? rawId.split(':', 1)[0] : rawId)
-    || '—'
+  const extractedTicker = rawId.includes(':') ? rawId.split(':', 1)[0] : rawId
+  const ticker = (decision['ticker'] as string | undefined) ?? (extractedTicker || '—')
   const finalVerdict = (decision['final_verdict'] as string | undefined) ?? '—'
   const convictionScore = Number(decision['conviction_score'] ?? 0)
   const allocationPct = Number(decision['suggested_allocation_pct'] ?? 0)
