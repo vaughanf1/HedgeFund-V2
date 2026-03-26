@@ -39,6 +39,7 @@ function verdictTextClass(verdict: string): string {
     case 'BUY':
       return 'text-emerald-400'
     case 'SELL':
+    case 'PASS':
       return 'text-red-400'
     case 'HOLD':
       return 'text-yellow-400'

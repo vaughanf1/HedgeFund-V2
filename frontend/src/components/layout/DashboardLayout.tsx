@@ -1,8 +1,18 @@
 import { PipelineGraph } from '@/components/graph/PipelineGraph'
 import { OpportunityFeed } from '@/components/feed/OpportunityFeed'
 import { OutputDashboard } from '@/components/output/OutputDashboard'
+import { useSSEStore, type SSEStatus } from '@/hooks/usePipelineSSE'
+
+const STATUS_DISPLAY: Record<SSEStatus, { dot: string; text: string; label: string }> = {
+  connected:    { dot: 'bg-emerald-500 animate-pulse', text: 'text-emerald-500', label: 'CONNECTED' },
+  connecting:   { dot: 'bg-yellow-500 animate-pulse',  text: 'text-yellow-500',  label: 'CONNECTING' },
+  disconnected: { dot: 'bg-zinc-600',                  text: 'text-zinc-600',     label: 'DISCONNECTED' },
+}
 
 export function DashboardLayout() {
+  const sseStatus = useSSEStore((s) => s.status)
+  const { dot, text, label } = STATUS_DISPLAY[sseStatus]
+
   return (
     <div
       style={{ height: '100dvh', display: 'grid', gridTemplateRows: 'auto 1fr', gridTemplateColumns: '1fr' }}
@@ -13,8 +23,8 @@ export function DashboardLayout() {
           HEDGEFUND V2 — ALPHA DISCOVERY ENGINE
         </span>
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-zinc-600" title="SSE disconnected" />
-          <span className="font-mono text-[10px] text-zinc-600">DISCONNECTED</span>
+          <span className={`h-2 w-2 rounded-full ${dot}`} title={`SSE ${label.toLowerCase()}`} />
+          <span className={`font-mono text-[10px] ${text}`}>{label}</span>
         </div>
       </header>
 

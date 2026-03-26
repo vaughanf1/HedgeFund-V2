@@ -139,26 +139,29 @@ export const usePipelineStore = create<PipelineStore>((set, get) => ({
 
     switch (eventType) {
       case 'AGENT_STARTED': {
-        const agentId = data['agent_id'] as string | undefined
-        if (agentId) updateNodeStatus(agentId, 'running')
+        // Backend sends: { persona, opportunity_id, ticker }
+        const persona = data['persona'] as string | undefined
+        if (persona) updateNodeStatus(persona, 'running')
         break
       }
       case 'AGENT_COMPLETE': {
-        const agentId = data['agent_id'] as string | undefined
+        // Backend sends: { persona, opportunity_id, ticker, verdict, confidence }
+        const persona = data['persona'] as string | undefined
         const verdict = data['verdict'] as string | undefined
         const ticker = data['ticker'] as string | undefined
-        const persona = data['persona'] as string | undefined
-        if (agentId) {
-          updateNodeStatus(agentId, 'complete', {
+        const opportunityId = data['opportunity_id'] as string | undefined
+        if (persona) {
+          updateNodeStatus(persona, 'complete', {
             lastResult: verdict ? String(verdict) : undefined,
           })
         }
         if (ticker) {
           const detectionItem: FeedItem = {
-            id: `${agentId ?? 'agent'}-${ticker}-${Date.now()}`,
+            id: `${persona ?? 'agent'}-${ticker}-${Date.now()}`,
             type: 'detection',
             ticker,
-            headline: `${persona ?? agentId ?? 'Agent'} completed analysis`,
+            headline: `${persona ?? 'Agent'} completed analysis — ${verdict ?? ''}`,
+            convictionScore: data['confidence'] != null ? Number(data['confidence']) : undefined,
             timestamp: Date.now(),
           }
           addFeedItem(detectionItem)
@@ -170,6 +173,7 @@ export const usePipelineStore = create<PipelineStore>((set, get) => ({
         break
       }
       case 'DECISION_MADE': {
+        // Backend sends: { opportunity_id, ticker, decision: {...}, verdicts: [...] }
         updateNodeStatus('cio', 'complete')
         const decision = data['decision'] as Record<string, unknown> | undefined
         const ticker = (data['ticker'] as string) ?? 'UNKNOWN'
@@ -179,7 +183,8 @@ export const usePipelineStore = create<PipelineStore>((set, get) => ({
           const finalVerdict = (decision['final_verdict'] as string) ?? 'UNKNOWN'
           const convictionScore = Number(decision['conviction_score'] ?? 0)
           const riskRating = (decision['risk_rating'] as string) ?? 'UNKNOWN'
-          const isApproval = new Set(['BUY', 'HOLD', 'MONITOR']).has(finalVerdict)
+          // Map backend INVEST/MONITOR/PASS to display-friendly values
+          const isApproval = new Set(['INVEST', 'MONITOR', 'BUY', 'HOLD']).has(finalVerdict)
 
           // Build FeedItem for the activity feed
           const decisionItem: FeedItem = {
@@ -194,7 +199,7 @@ export const usePipelineStore = create<PipelineStore>((set, get) => ({
             finalVerdict,
             rejectionReason: isApproval
               ? undefined
-              : (decision['rejection_reason'] as string | undefined) ?? finalVerdict,
+              : finalVerdict,
             timestamp: Date.now(),
           }
           addFeedItem(decisionItem)
@@ -215,14 +220,10 @@ export const usePipelineStore = create<PipelineStore>((set, get) => ({
             suggestedAllocationPct: Number(decision['suggested_allocation_pct'] ?? 0),
             finalVerdict,
             riskRating,
-            decidedAt: (decision['decided_at'] as string) ?? new Date().toISOString(),
+            decidedAt: new Date().toISOString(),
             agentScores,
-            cioSummary: decision['summary'] as string | undefined,
             keyCatalysts: decision['key_catalysts'] as string[] | undefined,
             timeHorizon: decision['time_horizon'] as string | undefined,
-            expectedUpside: decision['expected_upside'] != null
-              ? Number(decision['expected_upside'])
-              : undefined,
           }
 
           // Insert or replace existing opportunity, then re-sort and cap at 10

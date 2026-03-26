@@ -56,6 +56,11 @@ function mapAgentScore(v: ApiVerdict): AgentScore {
   }
 }
 
+/** Extract ticker from compound opportunity_id (ticker:detected_at) */
+function extractTicker(opportunityId: string): string {
+  return opportunityId.includes(':') ? opportunityId.split(':')[0] : opportunityId
+}
+
 function mapToOpportunity(
   summary: ApiOpportunitySummary,
   detail: ApiOpportunityDetail
@@ -63,17 +68,15 @@ function mapToOpportunity(
   const d = detail.decision
   return {
     opportunityId: summary.opportunity_id,
-    ticker: d.ticker ?? summary.opportunity_id,
+    ticker: d.ticker ?? extractTicker(summary.opportunity_id),
     convictionScore: summary.conviction_score,
     suggestedAllocationPct: summary.suggested_allocation_pct,
     finalVerdict: summary.final_verdict,
     riskRating: summary.risk_rating,
     decidedAt: summary.decided_at,
     agentScores: detail.verdicts.map(mapAgentScore),
-    cioSummary: d.summary,
     keyCatalysts: d.key_catalysts,
     timeHorizon: d.time_horizon,
-    expectedUpside: d.expected_upside,
   }
 }
 

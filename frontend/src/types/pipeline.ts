@@ -41,7 +41,7 @@ export interface Opportunity {
   riskRating: string
   suggestedAllocationPct: number
   finalVerdict: string
-  expectedUpside?: string
+  expectedUpside?: number
   timeHorizon?: string
   keyCatalysts?: string[]
   agentScores: AgentScore[]

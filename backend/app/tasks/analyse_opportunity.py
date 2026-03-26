@@ -115,10 +115,13 @@ def run_persona_agent(
     """
     r = redis.from_url(_REDIS_URL)
     try:
+        # Extract ticker from compound opportunity_id (ticker:detected_at)
+        ticker = opportunity_id.split(":", 1)[0] if ":" in opportunity_id else opportunity_id
+
         publish_event(
             r,
             "AGENT_STARTED",
-            {"opportunity_id": opportunity_id, "persona": persona_name},
+            {"opportunity_id": opportunity_id, "persona": persona_name, "ticker": ticker},
         )
 
         try:
@@ -149,6 +152,7 @@ def run_persona_agent(
             {
                 "opportunity_id": opportunity_id,
                 "persona": persona_name,
+                "ticker": ticker,
                 "verdict": verdict_dict.get("verdict"),
                 "confidence": verdict_dict.get("confidence"),
             },
@@ -170,6 +174,42 @@ def run_persona_agent(
         r.close()
 
 
+def _restructure_for_partitioner(opportunity: dict) -> dict:
+    """Restructure Phase 2 opportunity dict into data-type keyed format.
+
+    The DataPartitioner expects top-level keys matching its taxonomy:
+    fundamentals, price_action, news, insider_trades. Phase 2 scanner
+    stores signals as a flat list with signal_type labels. This function
+    reorganises that list so the partitioner can enforce information asymmetry.
+    """
+    # Map signal_type values to partitioner data-type keys
+    TYPE_MAP = {
+        "volume_spike": "price_action",
+        "price_breakout": "price_action",
+        "sector_momentum": "price_action",
+        "insider_cluster": "insider_trades",
+        "news_catalyst": "news",
+    }
+
+    categorised: dict[str, list] = {
+        "fundamentals": [],
+        "price_action": [],
+        "news": [],
+        "insider_trades": [],
+    }
+
+    for signal in opportunity.get("signals", []):
+        category = TYPE_MAP.get(signal.get("signal_type", ""), "price_action")
+        categorised[category].append(signal)
+
+    return {
+        **categorised,
+        "ticker": opportunity.get("ticker"),
+        "composite_score": opportunity.get("composite_score"),
+        "detected_at": opportunity.get("detected_at"),
+    }
+
+
 @app.task(
     name="app.tasks.analyse_opportunity.fan_out",
     bind=True,
@@ -184,7 +224,10 @@ def fan_out(self, opportunity: dict) -> None:
         opportunity: Opportunity dict enqueued by Phase 2 scanner.
     """
     opportunity_id = f"{opportunity['ticker']}:{opportunity['detected_at']}"
-    data_context = opportunity  # Full dict; partitioner inside graph filters per-persona
+
+    # Restructure into data-type keyed format so DataPartitioner can enforce
+    # information asymmetry per persona (AGNT-07).
+    data_context = _restructure_for_partitioner(opportunity)
 
     logger.info("Fanning out to %d agents for %s", AGENT_COUNT, opportunity_id)
 
@@ -346,16 +389,25 @@ def run_committee(self, opportunity_id: str) -> None:
         # ------------------------------------------------------------------
         # 9. Publish DECISION_MADE
         # ------------------------------------------------------------------
+        # Extract ticker from compound opportunity_id (ticker:detected_at)
+        ticker = opportunity_id.split(":", 1)[0] if ":" in opportunity_id else opportunity_id
+
         publish_event(
             r,
             "DECISION_MADE",
             {
                 "opportunity_id": opportunity_id,
-                "final_verdict": decision.final_verdict,
-                "conviction_score": decision.conviction_score,
-                "suggested_allocation_pct": decision.suggested_allocation_pct,
-                "risk_rating": decision.risk_rating,
-                "time_horizon": decision.time_horizon,
+                "ticker": ticker,
+                "decision": {
+                    "final_verdict": decision.final_verdict,
+                    "conviction_score": decision.conviction_score,
+                    "suggested_allocation_pct": decision.suggested_allocation_pct,
+                    "risk_rating": decision.risk_rating,
+                    "time_horizon": decision.time_horizon,
+                    "key_catalysts": decision.key_catalysts,
+                    "kill_conditions": decision.kill_conditions,
+                },
+                "verdicts": [v.model_dump() for v in verdicts],
             },
         )
 

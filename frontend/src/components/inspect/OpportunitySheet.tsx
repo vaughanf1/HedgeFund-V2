@@ -26,8 +26,10 @@ interface OpportunityDetail {
 
 function verdictBadgeVariant(verdict: string): 'success' | 'destructive' | 'warning' | 'running' | 'default' {
   switch (verdict.toUpperCase()) {
-    case 'BUY':     return 'success'
-    case 'SELL':    return 'destructive'
+    case 'BUY':
+    case 'INVEST':  return 'success'
+    case 'SELL':
+    case 'PASS':    return 'destructive'
     case 'HOLD':    return 'warning'
     case 'MONITOR': return 'running'
     default:        return 'default'
@@ -105,7 +107,11 @@ export function OpportunitySheet() {
 
   // Derived values from decision blob
   const decision = detail?.decision ?? {}
-  const ticker = (decision['ticker'] as string | undefined) ?? selectedOpportunityId ?? '—'
+  // Extract ticker from decision or from compound opportunity_id (ticker:detected_at)
+  const rawId = selectedOpportunityId ?? ''
+  const ticker = (decision['ticker'] as string | undefined)
+    ?? (rawId.includes(':') ? rawId.split(':', 1)[0] : rawId)
+    || '—'
   const finalVerdict = (decision['final_verdict'] as string | undefined) ?? '—'
   const convictionScore = Number(decision['conviction_score'] ?? 0)
   const allocationPct = Number(decision['suggested_allocation_pct'] ?? 0)

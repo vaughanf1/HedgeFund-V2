@@ -28,7 +28,8 @@ function getPersonaColor(persona: string) {
 function verdictBadgeVariant(verdict: string): 'success' | 'destructive' | 'warning' | 'running' | 'default' {
   switch (verdict.toUpperCase()) {
     case 'BUY':     return 'success'
-    case 'SELL':    return 'destructive'
+    case 'SELL':
+    case 'PASS':    return 'destructive'
     case 'HOLD':    return 'warning'
     case 'MONITOR': return 'running'
     default:        return 'default'

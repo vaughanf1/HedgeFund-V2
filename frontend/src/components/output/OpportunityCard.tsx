@@ -14,6 +14,7 @@ type VerdictStyle = {
 function getVerdictStyle(verdict: string): VerdictStyle {
   switch (verdict.toUpperCase()) {
     case 'BUY':
+    case 'INVEST':
       return {
         badgeClass: 'border-transparent bg-emerald-900/60 text-emerald-300',
         borderClass: 'border-l-emerald-500',

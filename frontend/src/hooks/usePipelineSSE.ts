@@ -1,5 +1,20 @@
 import { useEffect } from 'react'
+import { create } from 'zustand'
 import { usePipelineStore } from '@/store/pipelineStore'
+
+// ─── SSE connection state ─────────────────────────────────────────────────
+
+export type SSEStatus = 'connecting' | 'connected' | 'disconnected'
+
+interface SSEState {
+  status: SSEStatus
+  setStatus: (status: SSEStatus) => void
+}
+
+export const useSSEStore = create<SSEState>((set) => ({
+  status: 'disconnected',
+  setStatus: (status) => set({ status }),
+}))
 
 /**
  * Connect to the backend SSE stream and dispatch pipeline events to the
@@ -13,9 +28,15 @@ import { usePipelineStore } from '@/store/pipelineStore'
  */
 export function usePipelineSSE(url: string) {
   const handleSSEEvent = usePipelineStore((s) => s.handleSSEEvent)
+  const setStatus = useSSEStore((s) => s.setStatus)
 
   useEffect(() => {
+    setStatus('connecting')
     const es = new EventSource(url)
+
+    es.onopen = () => {
+      setStatus('connected')
+    }
 
     es.addEventListener('pipeline', (e: MessageEvent) => {
       try {
@@ -30,12 +51,14 @@ export function usePipelineSSE(url: string) {
     })
 
     es.onerror = () => {
+      setStatus('disconnected')
       // Browser EventSource will auto-reconnect — log warning only
       console.warn('[SSE] Connection error, browser will auto-reconnect…')
     }
 
     return () => {
       es.close()
+      setStatus('disconnected')
     }
-  }, [url, handleSSEEvent])
+  }, [url, handleSSEEvent, setStatus])
 }
