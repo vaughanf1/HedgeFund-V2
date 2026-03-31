@@ -1,4 +1,4 @@
-"""Celery task: ingest OHLCV price data from MassiveConnector into TimescaleDB."""
+"""Celery task: ingest OHLCV price data from YFinanceConnector into TimescaleDB."""
 
 from __future__ import annotations
 
@@ -6,14 +6,14 @@ import logging
 import os
 from datetime import date, timedelta
 
-from app.connectors.massive import MassiveConnector
+from app.connectors.yfinance_connector import YFinanceConnector
 from app.db.engine import SyncSessionLocal
 from app.db.models import PriceOHLCV
 from app.tasks.celery_app import app
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_WATCHLIST = "AAPL,MSFT,GOOGL,AMZN,NVDA"
+_DEFAULT_WATCHLIST = "SMR,OKLO,LEU,NNE,VST,IONQ,RGTI,QUBT,PLTR,RKLB,SMCI,VRT,CRSP,FSLR,CCJ,LUNR,ANET,NBIS,HIMS,KULR"
 
 
 @app.task(name="app.tasks.ingest_price.run", bind=True, max_retries=3)
@@ -29,7 +29,7 @@ def run(self: object, days_back: int = 1) -> dict:
     today = date.today()
     yesterday = today - timedelta(days=days_back)
 
-    connector = MassiveConnector()
+    connector = YFinanceConnector()
     total_rows = 0
     errors: list[str] = []
 

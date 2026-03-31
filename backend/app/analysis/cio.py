@@ -12,9 +12,11 @@ Decision rules:
 - key_catalysts = unique upside_scenario strings from BUY verdicts (up to 5)
 - kill_conditions = risks from lower-confidence agents (up to 5)
 - final_verdict:
-    BUY + conviction >= 50 → INVEST
-    SPLIT + conviction >= 60 → MONITOR
+    BUY + conviction >= 40 → INVEST
+    BUY (any conviction) → MONITOR
+    SPLIT + conviction >= 40 → MONITOR
     HOLD → MONITOR
+    conviction >= 45 → MONITOR
     anything else → PASS
 """
 
@@ -122,11 +124,15 @@ def make_cio_decision(report: CommitteeReport) -> CIODecision:
     # Final verdict
     # -----------------------------------------------------------------
     consensus = report.consensus
-    if consensus == "BUY" and conviction >= 50:
+    if consensus == "BUY" and conviction >= 40:
         final_verdict = "INVEST"
-    elif consensus == "SPLIT" and conviction >= 60:
+    elif consensus == "BUY":
+        final_verdict = "MONITOR"
+    elif consensus == "SPLIT" and conviction >= 40:
         final_verdict = "MONITOR"
     elif consensus == "HOLD":
+        final_verdict = "MONITOR"
+    elif conviction >= 45:
         final_verdict = "MONITOR"
     else:
         final_verdict = "PASS"

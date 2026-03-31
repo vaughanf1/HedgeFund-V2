@@ -178,10 +178,19 @@ def _restructure_for_partitioner(opportunity: dict) -> dict:
     """Restructure Phase 2 opportunity dict into data-type keyed format.
 
     The DataPartitioner expects top-level keys matching its taxonomy:
-    fundamentals, price_action, news, insider_trades. Phase 2 scanner
-    stores signals as a flat list with signal_type labels. This function
-    reorganises that list so the partitioner can enforce information asymmetry.
+    fundamentals, price_action, news, insider_trades. This function queries
+    the DB for real financial data and merges it with signal metadata so
+    each agent receives substantive data to analyse.
     """
+    from datetime import timedelta
+
+    from sqlalchemy import select
+
+    from app.db.engine import SyncSessionLocal
+    from app.db.models import Fundamentals, InsiderTrade, NewsItem, PriceOHLCV
+
+    ticker = opportunity.get("ticker", "")
+
     # Map signal_type values to partitioner data-type keys
     TYPE_MAP = {
         "volume_spike": "price_action",
@@ -202,9 +211,87 @@ def _restructure_for_partitioner(opportunity: dict) -> dict:
         category = TYPE_MAP.get(signal.get("signal_type", ""), "price_action")
         categorised[category].append(signal)
 
+    # ------------------------------------------------------------------
+    # Enrich with real DB data so agents have substance to analyse
+    # ------------------------------------------------------------------
+    now = datetime.now(timezone.utc)
+
+    with SyncSessionLocal() as session:
+        # Fundamentals — latest row
+        fund_row = session.execute(
+            select(Fundamentals)
+            .where(Fundamentals.ticker == ticker)
+            .order_by(Fundamentals.timestamp.desc())
+            .limit(1)
+        ).scalars().first()
+
+        if fund_row:
+            categorised["fundamentals"].append({
+                "pe_ratio": float(fund_row.pe_ratio) if fund_row.pe_ratio else None,
+                "revenue": float(fund_row.revenue) if fund_row.revenue else None,
+                "net_income": float(fund_row.net_income) if fund_row.net_income else None,
+                "eps": float(fund_row.eps) if fund_row.eps else None,
+                "debt_to_equity": float(fund_row.debt_to_equity) if fund_row.debt_to_equity else None,
+                "free_cash_flow": float(fund_row.free_cash_flow) if fund_row.free_cash_flow else None,
+                "market_cap": float(fund_row.market_cap) if fund_row.market_cap else None,
+            })
+
+        # Price action — last 20 days
+        price_rows = session.execute(
+            select(PriceOHLCV)
+            .where(PriceOHLCV.ticker == ticker)
+            .where(PriceOHLCV.timestamp >= now - timedelta(days=30))
+            .order_by(PriceOHLCV.timestamp.desc())
+            .limit(20)
+        ).scalars().all()
+
+        for p in price_rows:
+            categorised["price_action"].append({
+                "date": p.timestamp.isoformat(),
+                "open": float(p.open) if p.open else None,
+                "high": float(p.high) if p.high else None,
+                "low": float(p.low) if p.low else None,
+                "close": float(p.close) if p.close else None,
+                "volume": p.volume,
+            })
+
+        # News — last 7 days
+        news_rows = session.execute(
+            select(NewsItem)
+            .where(NewsItem.ticker == ticker)
+            .where(NewsItem.timestamp >= now - timedelta(days=7))
+            .order_by(NewsItem.timestamp.desc())
+            .limit(10)
+        ).scalars().all()
+
+        for n in news_rows:
+            categorised["news"].append({
+                "headline": n.headline,
+                "summary": n.summary,
+                "published": n.timestamp.isoformat(),
+            })
+
+        # Insider trades — last 90 days
+        insider_rows = session.execute(
+            select(InsiderTrade)
+            .where(InsiderTrade.ticker == ticker)
+            .where(InsiderTrade.timestamp >= now - timedelta(days=90))
+            .order_by(InsiderTrade.timestamp.desc())
+            .limit(20)
+        ).scalars().all()
+
+        for i in insider_rows:
+            categorised["insider_trades"].append({
+                "insider_name": i.insider_name,
+                "trade_type": i.trade_type,
+                "shares": i.shares,
+                "value": float(i.trade_value) if i.trade_value else None,
+                "date": i.timestamp.isoformat(),
+            })
+
     return {
         **categorised,
-        "ticker": opportunity.get("ticker"),
+        "ticker": ticker,
         "composite_score": opportunity.get("composite_score"),
         "detected_at": opportunity.get("detected_at"),
     }

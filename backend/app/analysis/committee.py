@@ -106,15 +106,16 @@ def detect_regime(opportunity: dict) -> str:
 
     macro_keywords = {
         "yield_curve", "credit_spread", "macro_divergence",
-        "liquidity_trap", "sector_rotation", "macro",
+        "liquidity_trap", "sector_rotation", "sector_momentum", "macro",
     }
     fundamental_keywords = {
-        "earnings_quality", "insider_buying", "fundamental_value",
-        "free_cash_flow", "value", "fundamental",
+        "earnings_quality", "insider_buying", "insider_cluster",
+        "fundamental_value", "free_cash_flow", "news_catalyst",
+        "value", "fundamental",
     }
     momentum_keywords = {
         "momentum_breakout", "price_momentum", "volume_spike",
-        "relative_strength", "momentum", "breakout",
+        "relative_strength", "price_breakout", "momentum", "breakout",
     }
 
     macro_count = sum(1 for s in signal_types if s in macro_keywords)

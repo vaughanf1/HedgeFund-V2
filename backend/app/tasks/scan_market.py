@@ -32,7 +32,7 @@ _INSTRUMENTATION_TTL = 3600  # 1 hour
 
 
 def _parse_watchlist() -> list[str]:
-    raw = os.environ.get("WATCHLIST", "AAPL,MSFT,GOOGL,AMZN,NVDA")
+    raw = os.environ.get("WATCHLIST", "SMR,OKLO,LEU,NNE,VST,IONQ,RGTI,QUBT,PLTR,RKLB,SMCI,VRT,CRSP,FSLR,CCJ,LUNR,ANET,NBIS,HIMS,KULR")
     return [t.strip() for t in raw.split(",") if t.strip()]
 
 

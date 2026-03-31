@@ -1,4 +1,4 @@
-"""Celery task: ingest insider-trading data from FMPConnector into TimescaleDB.
+"""Celery task: ingest insider-trading data from YFinanceConnector into TimescaleDB.
 
 Cache-first: skips tickers where insider trades are already fresh (< 7 days old).
 """
@@ -11,14 +11,14 @@ from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 
-from app.connectors.fmp import FMPConnector
+from app.connectors.yfinance_connector import YFinanceConnector
 from app.db.engine import SyncSessionLocal
 from app.db.models import InsiderTrade
 from app.tasks.celery_app import app
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_WATCHLIST = "AAPL,MSFT,GOOGL,AMZN,NVDA"
+_DEFAULT_WATCHLIST = "SMR,OKLO,LEU,NNE,VST,IONQ,RGTI,QUBT,PLTR,RKLB,SMCI,VRT,CRSP,FSLR,CCJ,LUNR,ANET,NBIS,HIMS,KULR"
 _FRESHNESS_TTL = timedelta(days=7)
 
 
@@ -31,7 +31,7 @@ def run(self: object) -> dict:
     watchlist_raw = os.environ.get("WATCHLIST", _DEFAULT_WATCHLIST)
     tickers = [t.strip() for t in watchlist_raw.split(",") if t.strip()]
 
-    connector = FMPConnector()
+    connector = YFinanceConnector()
     cutoff = datetime.now(tz=timezone.utc) - _FRESHNESS_TTL
     skipped = 0
     inserted = 0

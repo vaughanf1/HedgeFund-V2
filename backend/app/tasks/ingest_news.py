@@ -1,6 +1,6 @@
-"""Celery task: ingest news from both MassiveConnector and FMPConnector into TimescaleDB.
+"""Celery task: ingest news from YFinanceConnector into TimescaleDB.
 
-Deduplicates by headline before insert to avoid duplicate rows from overlapping sources.
+Deduplicates by headline before insert to avoid duplicate rows.
 """
 
 from __future__ import annotations
@@ -9,8 +9,7 @@ import logging
 import os
 from datetime import datetime, timezone
 
-from app.connectors.fmp import FMPConnector
-from app.connectors.massive import MassiveConnector
+from app.connectors.yfinance_connector import YFinanceConnector
 from app.db.engine import SyncSessionLocal
 from app.db.models import NewsItem
 from app.schemas.financial import FinancialSnapshot
@@ -18,7 +17,7 @@ from app.tasks.celery_app import app
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_WATCHLIST = "AAPL,MSFT,GOOGL,AMZN,NVDA"
+_DEFAULT_WATCHLIST = "SMR,OKLO,LEU,NNE,VST,IONQ,RGTI,QUBT,PLTR,RKLB,SMCI,VRT,CRSP,FSLR,CCJ,LUNR,ANET,NBIS,HIMS,KULR"
 
 
 def _dedup(snapshots: list[FinancialSnapshot]) -> list[FinancialSnapshot]:
@@ -31,38 +30,24 @@ def _dedup(snapshots: list[FinancialSnapshot]) -> list[FinancialSnapshot]:
             seen.add(key)
             result.append(snap)
         elif not key:
-            # No headline — keep it (can't deduplicate without a key)
             result.append(snap)
     return result
 
 
 @app.task(name="app.tasks.ingest_news.run", bind=True, max_retries=3)
 def run(self: object) -> dict:
-    """Fetch news for every WATCHLIST ticker from Massive + FMP, deduplicate, and persist."""
+    """Fetch news for every WATCHLIST ticker from yfinance, deduplicate, and persist."""
     watchlist_raw = os.environ.get("WATCHLIST", _DEFAULT_WATCHLIST)
     tickers = [t.strip() for t in watchlist_raw.split(",") if t.strip()]
 
-    massive = MassiveConnector()
-    fmp = FMPConnector()
+    connector = YFinanceConnector()
     total_inserted = 0
     total_dupes = 0
     errors: list[str] = []
 
     for ticker in tickers:
         try:
-            all_snapshots: list[FinancialSnapshot] = []
-
-            # Fetch from Massive
-            try:
-                all_snapshots.extend(massive.fetch_news(ticker))
-            except Exception as exc:  # noqa: BLE001
-                logger.warning("ingest_news: %s Massive fetch failed: %s", ticker, exc)
-
-            # Fetch from FMP
-            try:
-                all_snapshots.extend(fmp.fetch_news(ticker))
-            except Exception as exc:  # noqa: BLE001
-                logger.warning("ingest_news: %s FMP fetch failed: %s", ticker, exc)
+            all_snapshots = connector.fetch_news(ticker)
 
             before_dedup = len(all_snapshots)
             unique_snapshots = _dedup(all_snapshots)
