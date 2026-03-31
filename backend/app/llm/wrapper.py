@@ -2,35 +2,16 @@
 
 ALL LLM calls MUST go through this wrapper.
 
-This module is the single enforcement point for:
-1. Pre-call budget checking — calls that would exceed the daily limit are
-   rejected before any API request is made.
-2. Post-call cost recording — exact token counts from the API response are
-   used to calculate and record the true cost.
-3. Consistent error handling — all API errors are wrapped in ``LLMCallError``.
-
-Usage::
-
-    import redis.asyncio as aioredis
-    from app.llm.wrapper import llm_call, llm_call_with_persona
-
-    redis_client = aioredis.from_url("redis://localhost:6379")
-
-    result = await llm_call(
-        model="claude-haiku-4-5",
-        messages=[{"role": "user", "content": "Analyse AAPL"}],
-        system="You are a financial analyst.",
-        redis_client=redis_client,
-    )
-    print(result["content"])
+Uses OpenAI GPT-4o for structured agent analysis.
 """
 
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any
 
-import anthropic
+from openai import AsyncOpenAI
 
 from app.agents.loader import PersonaLoader
 from app.agents.partitioner import DataPartitioner
@@ -38,20 +19,38 @@ from app.agents.schemas import AgentVerdict
 from app.llm.exceptions import BudgetExceededError, LLMCallError
 from app.llm.spend_tracker import (
     DEFAULT_DAILY_LIMIT_USD,
-    COST_PER_MTOK,
     SpendTracker,
     calculate_call_cost,
 )
 
 logger = logging.getLogger(__name__)
 
-# Default model used when none is specified
-DEFAULT_MODEL = "claude-haiku-4-5"
 
-# Conservative per-call cost estimate used for pre-flight budget check.
-# This is ~2k input + ~500 output tokens at haiku pricing — a reasonable
-# lower bound so the gate fires before spend goes significantly over budget.
-_PREFLIGHT_ESTIMATE_USD = 0.003
+def _make_strict_schema(schema: dict) -> dict:
+    """Recursively add additionalProperties: false to all object-type nodes.
+
+    OpenAI strict mode requires this at every level.
+    """
+    schema = dict(schema)  # shallow copy
+    if schema.get("type") == "object":
+        schema["additionalProperties"] = False
+    if "properties" in schema:
+        schema["properties"] = {
+            k: _make_strict_schema(v) for k, v in schema["properties"].items()
+        }
+    if "items" in schema and isinstance(schema["items"], dict):
+        schema["items"] = _make_strict_schema(schema["items"])
+    if "$defs" in schema:
+        schema["$defs"] = {
+            k: _make_strict_schema(v) for k, v in schema["$defs"].items()
+        }
+    return schema
+
+# Default model
+DEFAULT_MODEL = "gpt-4o"
+
+# Conservative per-call cost estimate for pre-flight budget check
+_PREFLIGHT_ESTIMATE_USD = 0.005
 
 
 async def llm_call(
@@ -62,32 +61,7 @@ async def llm_call(
     daily_limit_usd: float = DEFAULT_DAILY_LIMIT_USD,
     max_tokens: int = 1024,
 ) -> dict[str, Any]:
-    """Make a single LLM call through the cost gate.
-
-    Checks budget before calling, records exact spend after, and raises
-    ``BudgetExceededError`` if the pre-flight estimate would breach the limit.
-
-    Args:
-        model: Anthropic model identifier (must be in ``COST_PER_MTOK``).
-        messages: List of message dicts with ``role`` and ``content`` keys.
-        system: System prompt string.
-        redis_client: An async Redis client (``redis.asyncio.Redis``).
-        daily_limit_usd: Daily spend ceiling in USD.
-        max_tokens: Maximum tokens in the model response.
-
-    Returns:
-        A dict with keys:
-        - ``content``: The text content of the first response block.
-        - ``input_tokens``: Token count for the input.
-        - ``output_tokens``: Token count for the output.
-        - ``cost_usd``: Exact cost of this call.
-        - ``model``: Model used.
-
-    Raises:
-        BudgetExceededError: If the pre-flight cost estimate would exceed budget.
-        LLMCallError: If the Anthropic API call fails.
-        KeyError: If *model* is not in the pricing table.
-    """
+    """Make a single LLM call through the cost gate."""
     tracker = SpendTracker(redis_client, daily_limit_usd=daily_limit_usd)
 
     # Pre-flight budget check
@@ -100,55 +74,40 @@ async def llm_call(
             projected_cost_usd=_PREFLIGHT_ESTIMATE_USD,
         )
 
-    logger.info(
-        "Making LLM call: model=%s, remaining_budget=$%.4f",
-        model,
-        remaining,
-    )
+    logger.info("Making LLM call: model=%s, remaining_budget=$%.4f", model, remaining)
 
-    # Make the API call
     try:
-        client = anthropic.AsyncAnthropic()
-        response = await client.messages.create(
+        client = AsyncOpenAI()
+        response = await client.chat.completions.create(
             model=model,
             max_tokens=max_tokens,
-            system=system,
-            messages=messages,
+            messages=[
+                {"role": "system", "content": system},
+                *messages,
+            ],
         )
-    except anthropic.APIError as exc:
-        raise LLMCallError(
-            f"Anthropic API error during {model} call: {exc}",
-            model=model,
-            original_error=exc,
-        ) from exc
     except Exception as exc:
         raise LLMCallError(
-            f"Unexpected error during {model} call: {exc}",
+            f"OpenAI API error during {model} call: {exc}",
             model=model,
             original_error=exc,
         ) from exc
 
-    # Extract usage and calculate exact cost
-    input_tokens: int = response.usage.input_tokens
-    output_tokens: int = response.usage.output_tokens
+    # Extract usage and calculate cost
+    usage = response.usage
+    input_tokens = usage.prompt_tokens if usage else 0
+    output_tokens = usage.completion_tokens if usage else 0
     cost_usd = calculate_call_cost(model, input_tokens, output_tokens)
 
-    # Record exact spend
     await tracker.async_record_spend(cost_usd)
 
-    # Extract text content
     content = ""
-    if response.content:
-        first_block = response.content[0]
-        if hasattr(first_block, "text"):
-            content = first_block.text
+    if response.choices:
+        content = response.choices[0].message.content or ""
 
     logger.info(
         "LLM call complete: model=%s, tokens=%d/%d, cost=$%.6f",
-        model,
-        input_tokens,
-        output_tokens,
-        cost_usd,
+        model, input_tokens, output_tokens, cost_usd,
     )
 
     return {
@@ -168,38 +127,13 @@ async def llm_call_with_persona(
     daily_limit_usd: float = DEFAULT_DAILY_LIMIT_USD,
     max_tokens: int = 1024,
 ) -> dict[str, Any]:
-    """Convenience wrapper: render persona prompt and call LLM with cost gate.
-
-    Partitions the data context for the persona, renders the system prompt,
-    and calls ``llm_call``.
-
-    Args:
-        persona_name: One of ``{"buffett", "munger", "ackman", "cohen", "dalio"}``.
-        data_context: Full data dict. The partitioner will strip fields the
-            persona is not permitted to see.
-        redis_client: An async Redis client.
-        model: Anthropic model identifier.
-        daily_limit_usd: Daily spend ceiling in USD.
-        max_tokens: Maximum tokens in the model response.
-
-    Returns:
-        Same dict as ``llm_call`` with an additional ``persona`` key.
-
-    Raises:
-        BudgetExceededError: If the daily budget would be exceeded.
-        LLMCallError: If the API call fails.
-        ValueError: If *persona_name* is not recognised.
-    """
+    """Render persona prompt and call LLM with cost gate."""
     partitioner = DataPartitioner()
     loader = PersonaLoader()
 
-    # Enforce information asymmetry: strip fields this persona cannot see
     partitioned = partitioner.partition_raw(persona_name, data_context)
-
-    # Render the persona Markdown as the system prompt
     system_prompt = loader.render_persona(persona_name, partitioned)
 
-    # Single-turn: ask the persona to analyse the data
     messages = [
         {
             "role": "user",
@@ -230,29 +164,7 @@ async def llm_call_with_persona_parsed(
     daily_limit_usd: float = DEFAULT_DAILY_LIMIT_USD,
     max_tokens: int = 1024,
 ) -> AgentVerdict:
-    """Like llm_call_with_persona but uses messages.parse() for structured output.
-
-    Returns a validated AgentVerdict Pydantic object instead of raw text.
-    Budget gate is enforced before the API call using the same pre-flight
-    estimate as ``llm_call``. Exact spend is recorded after the call.
-
-    Args:
-        persona_name: One of ``{"buffett", "munger", "ackman", "cohen", "dalio"}``.
-        data_context: Full data dict. The partitioner strips fields the persona
-            is not permitted to see before the prompt is rendered.
-        redis_client: An async Redis client (``redis.asyncio.Redis``).
-        model: Anthropic model identifier (must be in ``COST_PER_MTOK``).
-        daily_limit_usd: Daily spend ceiling in USD.
-        max_tokens: Maximum tokens in the model response.
-
-    Returns:
-        A validated ``AgentVerdict`` Pydantic instance.
-
-    Raises:
-        BudgetExceededError: If the daily budget would be exceeded.
-        LLMCallError: If the API call fails or structured output parsing fails.
-        ValueError: If *persona_name* is not recognised.
-    """
+    """Call LLM with structured JSON output, return validated AgentVerdict."""
     tracker = SpendTracker(redis_client, daily_limit_usd=daily_limit_usd)
 
     # Pre-flight budget check
@@ -267,9 +179,7 @@ async def llm_call_with_persona_parsed(
 
     logger.info(
         "Making parsed LLM call: persona=%s, model=%s, remaining_budget=$%.4f",
-        persona_name,
-        model,
-        remaining,
+        persona_name, model, remaining,
     )
 
     # Partition data and render persona prompt
@@ -278,50 +188,62 @@ async def llm_call_with_persona_parsed(
     partitioned = partitioner.partition_raw(persona_name, data_context)
     system_prompt = loader.render_persona(persona_name, partitioned)
 
-    # Make the structured output API call
+    # Build JSON schema for structured output (OpenAI strict mode compatible)
+    verdict_schema = _make_strict_schema(AgentVerdict.model_json_schema())
+
     try:
-        client = anthropic.AsyncAnthropic()
-        response = await client.messages.parse(
+        client = AsyncOpenAI()
+        response = await client.chat.completions.create(
             model=model,
             max_tokens=max_tokens,
-            system=system_prompt,
             messages=[
+                {"role": "system", "content": system_prompt},
                 {
                     "role": "user",
                     "content": "Analyse the data in your system prompt and return your verdict.",
-                }
+                },
             ],
-            output_format=AgentVerdict,
+            response_format={
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "AgentVerdict",
+                    "strict": True,
+                    "schema": verdict_schema,
+                },
+            },
         )
-    except anthropic.APIError as exc:
-        raise LLMCallError(
-            f"Anthropic API error during {model} parsed call for {persona_name}: {exc}",
-            model=model,
-            original_error=exc,
-        ) from exc
     except Exception as exc:
         raise LLMCallError(
-            f"Unexpected error during {model} parsed call for {persona_name}: {exc}",
+            f"OpenAI API error during {model} parsed call for {persona_name}: {exc}",
             model=model,
             original_error=exc,
         ) from exc
 
-    # Extract usage and calculate exact cost
-    input_tokens: int = response.usage.input_tokens
-    output_tokens: int = response.usage.output_tokens
+    # Extract usage and calculate cost
+    usage = response.usage
+    input_tokens = usage.prompt_tokens if usage else 0
+    output_tokens = usage.completion_tokens if usage else 0
     cost_usd = calculate_call_cost(model, input_tokens, output_tokens)
 
-    # Record exact spend
     await tracker.async_record_spend(cost_usd)
 
     logger.info(
         "Parsed LLM call complete: persona=%s, model=%s, tokens=%d/%d, cost=$%.6f",
-        persona_name,
-        model,
-        input_tokens,
-        output_tokens,
-        cost_usd,
+        persona_name, model, input_tokens, output_tokens, cost_usd,
     )
 
-    # response.parsed_output is the validated AgentVerdict Pydantic instance
-    return response.parsed_output
+    # Parse the JSON response into AgentVerdict
+    raw_content = response.choices[0].message.content or "{}"
+    try:
+        parsed = json.loads(raw_content)
+        # Ensure persona is set correctly
+        parsed["persona"] = persona_name
+        verdict = AgentVerdict(**parsed)
+    except Exception as exc:
+        raise LLMCallError(
+            f"Failed to parse structured output for {persona_name}: {raw_content[:200]}",
+            model=model,
+            original_error=exc,
+        ) from exc
+
+    return verdict

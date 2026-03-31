@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>CTA — Built in a Day</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    background: #0a0a0b;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .glow {
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    filter: blur(150px);
+    background: rgba(10,132,255,0.12);
+    opacity: 0;
+    animation: glowIn 3s ease-out 0.5s forwards;
+  }
+
+  @keyframes glowIn { to { opacity: 1; } }
+
+  .content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 60px;
+    gap: 50px;
+  }
+
+  /* Tech stack icons */
+  .stack {
+    display: flex;
+    gap: 24px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.3s forwards;
+  }
+
+  .stack-chip {
+    padding: 10px 20px;
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: #71717a;
+  }
+
+  .headline-group {
+    text-align: center;
+  }
+
+  .built-with {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #0A84FF;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.6s forwards;
+    margin-bottom: 24px;
+  }
+
+  .headline {
+    font-size: 56px;
+    font-weight: 800;
+    color: #fafafa;
+    line-height: 1.15;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.9s forwards;
+  }
+
+  .headline span { color: #0A84FF; }
+
+  .sub {
+    font-size: 22px;
+    color: #71717a;
+    margin-top: 20px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 1.2s forwards;
+  }
+
+  /* Stats row */
+  .stats {
+    display: flex;
+    gap: 50px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 1.5s forwards;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 48px;
+    font-weight: 800;
+    color: #fafafa;
+  }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #52525b;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+
+  /* Architecture diagram mini */
+  .arch-mini {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 1.8s forwards;
+  }
+
+  .arch-node {
+    padding: 12px 20px;
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #a1a1aa;
+  }
+
+  .arch-arrow {
+    color: #3f3f46;
+    font-size: 18px;
+  }
+
+  /* CTA box */
+  .cta-box {
+    padding: 36px 60px;
+    background: linear-gradient(135deg, #0A84FF15, #0A84FF08);
+    border: 1px solid #0A84FF33;
+    border-radius: 20px;
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 2.2s forwards;
+  }
+
+  .cta-text {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fafafa;
+    margin-bottom: 12px;
+  }
+
+  .cta-comment {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px;
+    font-weight: 800;
+    color: #0A84FF;
+    letter-spacing: 4px;
+  }
+
+  .cta-sub {
+    font-size: 16px;
+    color: #71717a;
+    margin-top: 12px;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+  <div class="glow"></div>
+
+  <div class="content">
+    <div class="stack">
+      <div class="stack-chip">Python</div>
+      <div class="stack-chip">FastAPI</div>
+      <div class="stack-chip">GPT-4o</div>
+      <div class="stack-chip">React</div>
+      <div class="stack-chip">Redis</div>
+    </div>
+
+    <div class="headline-group">
+      <div class="built-with">Built With Claude Code</div>
+      <div class="headline">The Entire Thing.<br><span>One Day.</span></div>
+      <div class="sub">Full-stack AI hedge fund from zero to live data</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value">5</div>
+        <div class="stat-label">AI Agents</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">4</div>
+        <div class="stat-label">Detectors</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">15m</div>
+        <div class="stat-label">Scan Interval</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">$10</div>
+        <div class="stat-label">Daily Budget</div>
+      </div>
+    </div>
+
+    <div class="arch-mini">
+      <div class="arch-node">Scanner</div>
+      <div class="arch-arrow">&rarr;</div>
+      <div class="arch-node">Signals</div>
+      <div class="arch-arrow">&rarr;</div>
+      <div class="arch-node">Gate</div>
+      <div class="arch-arrow">&rarr;</div>
+      <div class="arch-node">5 Agents</div>
+      <div class="arch-arrow">&rarr;</div>
+      <div class="arch-node">Decision</div>
+    </div>
+
+    <div class="cta-box">
+      <div class="cta-text">Want me to open source it?</div>
+      <div class="cta-comment">"FUND"</div>
+      <div class="cta-sub">Comment below and I'll make it happen</div>
+    </div>
+  </div>
+</body>
+</html>

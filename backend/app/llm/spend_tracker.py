@@ -24,13 +24,13 @@ logger = logging.getLogger(__name__)
 # Update when Anthropic changes pricing.
 # ---------------------------------------------------------------------------
 COST_PER_MTOK: dict[str, dict[str, float]] = {
-    "claude-haiku-4-5": {
-        "input": 0.80,   # $0.80 / M input tokens
-        "output": 4.00,  # $4.00 / M output tokens
+    "gpt-4o": {
+        "input": 2.50,    # $2.50 / M input tokens
+        "output": 10.00,  # $10.00 / M output tokens
     },
-    "claude-sonnet-4-6": {
-        "input": 3.00,   # $3.00 / M input tokens
-        "output": 15.00, # $15.00 / M output tokens
+    "gpt-4o-mini": {
+        "input": 0.15,    # $0.15 / M input tokens
+        "output": 0.60,   # $0.60 / M output tokens
     },
 }
 

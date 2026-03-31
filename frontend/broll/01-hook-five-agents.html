@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Hook — Five Agents</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    background: #0a0a0b;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Subtle grid background */
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Radial glow */
+  .glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0;
+    animation: glowIn 2s ease-out 0.5s forwards;
+  }
+  .glow-1 { top: 200px; left: 50%; transform: translateX(-50%); background: rgba(10,132,255,0.15); }
+  .glow-2 { bottom: 300px; left: 50%; transform: translateX(-50%); background: rgba(16,185,129,0.1); }
+
+  @keyframes glowIn { to { opacity: 1; } }
+
+  .content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 120px 60px 80px;
+  }
+
+  .title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: #0A84FF;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.3s forwards;
+    margin-bottom: 24px;
+  }
+
+  .headline {
+    font-size: 42px;
+    font-weight: 800;
+    color: #fafafa;
+    text-align: center;
+    line-height: 1.2;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.6s forwards;
+    margin-bottom: 16px;
+  }
+
+  .headline span { color: #0A84FF; }
+
+  .subtitle {
+    font-size: 20px;
+    color: #71717a;
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.9s forwards;
+    margin-bottom: 80px;
+  }
+
+  /* Central brain node */
+  .brain {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #0A84FF22, #0A84FF08);
+    border: 2px solid #0A84FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    animation: scaleIn 0.5s ease-out 1.2s forwards;
+    position: relative;
+    margin-bottom: 60px;
+    box-shadow: 0 0 40px rgba(10,132,255,0.2);
+  }
+
+  .brain-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0A84FF;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .brain-pulse {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 1px solid #0A84FF;
+    animation: pulse 2s ease-out 1.5s infinite;
+    opacity: 0;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+
+  /* Connector lines */
+  .connectors {
+    position: relative;
+    width: 100%;
+    height: 100px;
+    opacity: 0;
+    animation: fadeIn 0.4s ease-out 1.6s forwards;
+  }
+
+  .connectors svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .conn-line {
+    stroke: #3f3f46;
+    stroke-width: 2;
+    stroke-dasharray: 6 4;
+    fill: none;
+  }
+
+  .conn-dot {
+    fill: #0A84FF;
+    r: 4;
+  }
+
+  /* Agent cards row */
+  .agents {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .agent-card {
+    width: 170px;
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 12px;
+    padding: 20px 16px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(30px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .agent-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent);
+  }
+
+  .agent-card:nth-child(1) { --accent: #0A84FF; animation: cardIn 0.5s ease-out 1.8s forwards; }
+  .agent-card:nth-child(2) { --accent: #8B5CF6; animation: cardIn 0.5s ease-out 2.0s forwards; }
+  .agent-card:nth-child(3) { --accent: #F59E0B; animation: cardIn 0.5s ease-out 2.2s forwards; }
+  .agent-card:nth-child(4) { --accent: #10B981; animation: cardIn 0.5s ease-out 2.4s forwards; }
+  .agent-card:nth-child(5) { --accent: #EF4444; animation: cardIn 0.5s ease-out 2.6s forwards; }
+
+  .agent-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.15;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .agent-icon span {
+    font-size: 22px;
+    opacity: 1;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .agent-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fafafa;
+    margin-bottom: 4px;
+  }
+
+  .agent-style {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #71717a;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Bottom row (4th and 5th card centered) */
+  .agents-bottom {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    width: 100%;
+    margin-top: 16px;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.5); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+
+  <div class="content">
+    <div class="title">AI Alpha Discovery</div>
+    <div class="headline">Five <span>Independent</span> AI Analysts</div>
+    <div class="subtitle">Modeled after the greatest investors of all time</div>
+
+    <div class="brain">
+      <div class="brain-pulse"></div>
+      <span class="brain-label">Engine</span>
+    </div>
+
+    <!-- Top row: 3 agents -->
+    <div class="agents">
+      <div class="agent-card" style="--accent: #0A84FF;">
+        <div class="agent-icon"><span>W</span></div>
+        <div class="agent-name">Buffett</div>
+        <div class="agent-style">Fundamental</div>
+      </div>
+      <div class="agent-card" style="--accent: #8B5CF6;">
+        <div class="agent-icon"><span>C</span></div>
+        <div class="agent-name">Munger</div>
+        <div class="agent-style">Quality</div>
+      </div>
+      <div class="agent-card" style="--accent: #F59E0B;">
+        <div class="agent-icon"><span>B</span></div>
+        <div class="agent-name">Ackman</div>
+        <div class="agent-style">Activist</div>
+      </div>
+    </div>
+
+    <!-- Bottom row: 2 agents -->
+    <div class="agents-bottom">
+      <div class="agent-card" style="--accent: #10B981;">
+        <div class="agent-icon"><span>S</span></div>
+        <div class="agent-name">Cohen</div>
+        <div class="agent-style">Momentum</div>
+      </div>
+      <div class="agent-card" style="--accent: #EF4444;">
+        <div class="agent-icon"><span>R</span></div>
+        <div class="agent-name">Dalio</div>
+        <div class="agent-style">Macro</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

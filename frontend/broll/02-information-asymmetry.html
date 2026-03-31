@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Information Asymmetry</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    background: #0a0a0b;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 100px 50px 80px;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #F59E0B;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.2s forwards;
+    margin-bottom: 20px;
+  }
+
+  .headline {
+    font-size: 38px;
+    font-weight: 800;
+    color: #fafafa;
+    text-align: center;
+    line-height: 1.2;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.5s forwards;
+    margin-bottom: 12px;
+  }
+  .headline span { color: #F59E0B; }
+
+  .sub {
+    font-size: 18px;
+    color: #71717a;
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.8s forwards;
+    margin-bottom: 60px;
+    max-width: 700px;
+    line-height: 1.5;
+  }
+
+  /* Data types floating across the top */
+  .data-river {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 50px;
+    opacity: 0;
+    animation: fadeUp 0.5s ease-out 1.1s forwards;
+  }
+
+  .data-chip {
+    padding: 10px 22px;
+    border-radius: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid;
+  }
+
+  .chip-fund { background: #0A84FF11; border-color: #0A84FF44; color: #0A84FF; }
+  .chip-price { background: #10B98111; border-color: #10B98144; color: #10B981; }
+  .chip-news { background: #F59E0B11; border-color: #F59E0B44; color: #F59E0B; }
+  .chip-insider { background: #8B5CF611; border-color: #8B5CF644; color: #8B5CF6; }
+
+  /* Agent rows */
+  .agent-rows {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .agent-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+
+  .agent-row:nth-child(1) { animation: slideIn 0.5s ease-out 1.4s forwards; }
+  .agent-row:nth-child(2) { animation: slideIn 0.5s ease-out 1.7s forwards; }
+  .agent-row:nth-child(3) { animation: slideIn 0.5s ease-out 2.0s forwards; }
+  .agent-row:nth-child(4) { animation: slideIn 0.5s ease-out 2.3s forwards; }
+  .agent-row:nth-child(5) { animation: slideIn 0.5s ease-out 2.6s forwards; }
+
+  .agent-label {
+    width: 160px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .agent-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .agent-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fafafa;
+  }
+
+  /* Data access grid */
+  .access-grid {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .access-cell {
+    width: 170px;
+    height: 52px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+
+  .access-yes {
+    border: 1px solid;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .access-yes::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% { left: -100%; }
+    50% { left: 150%; }
+    100% { left: 150%; }
+  }
+
+  .access-no {
+    background: #18181b;
+    border: 1px solid #1f1f23;
+    color: #3f3f46;
+  }
+
+  .yes-fund { background: #0A84FF0D; border-color: #0A84FF44; color: #0A84FF; }
+  .yes-price { background: #10B9810D; border-color: #10B98144; color: #10B981; }
+  .yes-news { background: #F59E0B0D; border-color: #F59E0B44; color: #F59E0B; }
+  .yes-insider { background: #8B5CF60D; border-color: #8B5CF644; color: #8B5CF6; }
+
+  /* Key insight box at bottom */
+  .insight-box {
+    margin-top: 60px;
+    padding: 28px 36px;
+    background: #18181b;
+    border: 1px solid #F59E0B33;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 800px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 3.2s forwards;
+    position: relative;
+  }
+
+  .insight-box::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #F59E0B22, transparent, #F59E0B11);
+    z-index: -1;
+  }
+
+  .insight-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+
+  .insight-text {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fafafa;
+    line-height: 1.5;
+  }
+
+  .insight-text span { color: #F59E0B; }
+
+  /* Colors for agent dots */
+  .dot-buffett { background: #0A84FF22; color: #0A84FF; }
+  .dot-munger { background: #8B5CF622; color: #8B5CF6; }
+  .dot-ackman { background: #F59E0B22; color: #F59E0B; }
+  .dot-cohen { background: #10B98122; color: #10B981; }
+  .dot-dalio { background: #EF444422; color: #EF4444; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+</style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+
+  <div class="content">
+    <div class="section-label">Information Asymmetry</div>
+    <div class="headline">Each Agent Sees <span>Different Data</span></div>
+    <div class="sub">They can't copy each other. When they disagree, that's real signal.</div>
+
+    <div class="data-river">
+      <div class="data-chip chip-fund">Fundamentals</div>
+      <div class="data-chip chip-price">Price Action</div>
+      <div class="data-chip chip-news">News</div>
+      <div class="data-chip chip-insider">Insider</div>
+    </div>
+
+    <div class="agent-rows">
+      <!-- Buffett: fundamentals only -->
+      <div class="agent-row">
+        <div class="agent-label">
+          <div class="agent-dot dot-buffett">W</div>
+          <span class="agent-name">Buffett</span>
+        </div>
+        <div class="access-grid">
+          <div class="access-cell access-yes yes-fund">FUNDAMENTALS</div>
+          <div class="access-cell access-no">BLOCKED</div>
+          <div class="access-cell access-no">BLOCKED</div>
+          <div class="access-cell access-no">BLOCKED</div>
+        </div>
+      </div>
+
+      <!-- Munger: fundamentals + insider -->
+      <div class="agent-row">
+        <div class="agent-label">
+          <div class="agent-dot dot-munger">C</div>
+          <span class="agent-name">Munger</span>
+        </div>
+        <div class="access-grid">
+          <div class="access-cell access-yes yes-fund">FUNDAMENTALS</div>
+          <div class="access-cell access-no">BLOCKED</div>
+          <div class="access-cell access-no">BLOCKED</div>
+          <div class="access-cell access-yes yes-insider">INSIDER</div>
+        </div>
+      </div>
+
+      <!-- Ackman: everything -->
+      <div class="agent-row">
+        <div class="agent-label">
+          <div class="agent-dot dot-ackman">B</div>
+          <span class="agent-name">Ackman</span>
+        </div>
+        <div class="access-grid">
+          <div class="access-cell access-yes yes-fund">FUNDAMENTALS</div>
+          <div class="access-cell access-yes yes-price">PRICE</div>
+          <div class="access-cell access-yes yes-news">NEWS</div>
+          <div class="access-cell access-yes yes-insider">INSIDER</div>
+        </div>
+      </div>
+
+      <!-- Cohen: price action only -->
+      <div class="agent-row">
+        <div class="agent-label">
+          <div class="agent-dot dot-cohen">S</div>
+          <span class="agent-name">Cohen</span>
+        </div>
+        <div class="access-grid">
+          <div class="access-cell access-no">BLOCKED</div>
+          <div class="access-cell access-yes yes-price">PRICE</div>
+          <div class="access-cell access-no">BLOCKED</div>
+          <div class="access-cell access-no">BLOCKED</div>
+        </div>
+      </div>
+
+      <!-- Dalio: macro + price -->
+      <div class="agent-row">
+        <div class="agent-label">
+          <div class="agent-dot dot-dalio">R</div>
+          <span class="agent-name">Dalio</span>
+        </div>
+        <div class="access-grid">
+          <div class="access-cell access-no">BLOCKED</div>
+          <div class="access-cell access-yes yes-price">PRICE</div>
+          <div class="access-cell access-yes yes-news">NEWS</div>
+          <div class="access-cell access-no">BLOCKED</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <div class="insight-text">
+        When Buffett says <span>BUY</span> on cash flow alone<br>
+        and Cohen says <span>PASS</span> on price action alone<br>
+        — that disagreement is <span>meaningful signal</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

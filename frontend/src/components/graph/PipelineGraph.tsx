@@ -1,4 +1,4 @@
-import { ReactFlow, Background, Controls, type NodeTypes, type EdgeTypes } from '@xyflow/react'
+import { ReactFlow, Background, Controls, MiniMap, type NodeTypes, type EdgeTypes } from '@xyflow/react'
 import { usePipelineStore } from '@/store/pipelineStore'
 import { AgentNode } from './nodes/AgentNode'
 import { GateNode } from './nodes/GateNode'
@@ -32,12 +32,22 @@ export function PipelineGraph() {
       edgeTypes={edgeTypes}
       colorMode="dark"
       fitView
-      fitViewOptions={{ padding: 0.2 }}
+      fitViewOptions={{ padding: 0.3 }}
+      minZoom={0.3}
+      maxZoom={2.5}
+      panOnScroll
+      panOnScrollMode="free"
       className="bloomberg-flow"
       proOptions={{ hideAttribution: true }}
     >
       <Background color="#27272a" gap={24} />
-      <Controls />
+      <Controls showFitView />
+      <MiniMap
+        nodeColor="#27272a"
+        nodeStrokeColor="#3f3f46"
+        maskColor="rgba(0,0,0,0.7)"
+        style={{ background: '#0a0a0b', border: '1px solid #27272a' }}
+      />
     </ReactFlow>
   )
 }

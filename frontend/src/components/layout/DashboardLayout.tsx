@@ -32,13 +32,13 @@ export function DashboardLayout() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 320px 380px',
+          gridTemplateColumns: 'minmax(0, 1fr) 320px 380px',
           overflow: 'hidden',
           height: '100%',
         }}
       >
-        {/* Left: Pipeline Graph */}
-        <div className="relative overflow-hidden border-r border-zinc-800">
+        {/* Left: Pipeline Graph — needs explicit w/h for React Flow */}
+        <div className="relative border-r border-zinc-800" style={{ width: '100%', height: '100%' }}>
           <PipelineGraph />
         </div>
 

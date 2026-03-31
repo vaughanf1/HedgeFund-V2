@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Live Result</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    background: #0a0a0b;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .glow {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0;
+    animation: glowIn 2s ease-out 0.5s forwards;
+  }
+  .glow-1 { top: 300px; left: 30%; background: rgba(10,132,255,0.1); }
+  .glow-2 { bottom: 400px; right: 20%; background: rgba(16,185,129,0.08); }
+
+  @keyframes glowIn { to { opacity: 1; } }
+
+  .content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 90px 50px 80px;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #10B981;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.2s forwards;
+    margin-bottom: 20px;
+  }
+
+  .headline {
+    font-size: 36px;
+    font-weight: 800;
+    color: #fafafa;
+    text-align: center;
+    line-height: 1.2;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.5s forwards;
+    margin-bottom: 10px;
+  }
+  .headline span { color: #10B981; }
+
+  .sub {
+    font-size: 17px;
+    color: #71717a;
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.7s forwards;
+    margin-bottom: 50px;
+  }
+
+  /* Result card */
+  .result-card {
+    width: 900px;
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 20px;
+    overflow: hidden;
+    opacity: 0;
+    animation: scaleIn 0.6s ease-out 1.0s forwards;
+    margin-bottom: 30px;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 36px;
+    border-bottom: 1px solid #27272a;
+  }
+
+  .ticker-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .ticker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 44px;
+    font-weight: 800;
+    color: #fafafa;
+  }
+
+  .verdict-badge {
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+
+  .badge-monitor { background: #0A84FF22; color: #0A84FF; border: 1px solid #0A84FF44; }
+
+  .live-dot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #10B981;
+  }
+
+  .live-dot::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10B981;
+    animation: blink 1.5s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Stats row */
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+
+  .stat {
+    padding: 28px 36px;
+    text-align: center;
+    border-right: 1px solid #27272a;
+  }
+  .stat:last-child { border-right: none; }
+
+  .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 40px;
+    font-weight: 800;
+    color: #fafafa;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #71717a;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  /* Agent verdicts breakdown */
+  .verdicts-section {
+    padding: 28px 36px;
+    border-top: 1px solid #27272a;
+  }
+
+  .verdicts-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #52525b;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+  }
+
+  .verdicts-grid {
+    display: flex;
+    gap: 14px;
+  }
+
+  .v-card {
+    flex: 1;
+    background: #0f0f12;
+    border: 1px solid #27272a;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  .v-card:nth-child(1) { animation: vIn 0.4s ease-out 1.6s forwards; }
+  .v-card:nth-child(2) { animation: vIn 0.4s ease-out 1.8s forwards; }
+  .v-card:nth-child(3) { animation: vIn 0.4s ease-out 2.0s forwards; }
+  .v-card:nth-child(4) { animation: vIn 0.4s ease-out 2.2s forwards; }
+  .v-card:nth-child(5) { animation: vIn 0.4s ease-out 2.4s forwards; }
+
+  @keyframes vIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .v-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #a1a1aa;
+    margin-bottom: 8px;
+  }
+
+  .v-verdict {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .v-buy { color: #10B981; }
+  .v-hold { color: #F59E0B; }
+  .v-pass { color: #EF4444; }
+
+  .v-conf {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fafafa;
+  }
+
+  .v-conf-label {
+    font-size: 10px;
+    color: #52525b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  /* Confidence bar */
+  .conf-bar-bg {
+    width: 100%;
+    height: 4px;
+    background: #27272a;
+    border-radius: 2px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+
+  .conf-bar {
+    height: 100%;
+    border-radius: 2px;
+    animation: barGrow 0.8s ease-out 2.6s forwards;
+    width: 0;
+  }
+
+  @keyframes barGrow {
+    to { width: var(--w); }
+  }
+
+  .bar-buy { background: #10B981; }
+  .bar-hold { background: #F59E0B; }
+  .bar-pass { background: #EF4444; }
+
+  /* Bottom insight */
+  .bottom-note {
+    max-width: 750px;
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 3.0s forwards;
+  }
+
+  .bottom-note p {
+    font-size: 18px;
+    color: #71717a;
+    line-height: 1.6;
+  }
+
+  .bottom-note span { color: #fafafa; font-weight: 600; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+</style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+
+  <div class="content">
+    <div class="section-label">Live Analysis</div>
+    <div class="headline">Not One Opinion — <span>Five</span></div>
+    <div class="sub">Five independent AI analysts, structurally forced to think differently</div>
+
+    <div class="result-card">
+      <div class="card-header">
+        <div class="ticker-group">
+          <span class="ticker">AAPL</span>
+          <span class="verdict-badge badge-monitor">MONITOR</span>
+        </div>
+        <div class="live-dot">LIVE</div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value">65</div>
+          <div class="stat-label">Conviction</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">5.0%</div>
+          <div class="stat-label">Allocation</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" style="color: #F59E0B;">MED</div>
+          <div class="stat-label">Risk Rating</div>
+        </div>
+      </div>
+
+      <div class="verdicts-section">
+        <div class="verdicts-label">Agent Breakdown</div>
+        <div class="verdicts-grid">
+          <div class="v-card">
+            <div class="v-name">Buffett</div>
+            <div class="v-verdict v-pass">PASS</div>
+            <div class="v-conf">60</div>
+            <div class="v-conf-label">Confidence</div>
+            <div class="conf-bar-bg"><div class="conf-bar bar-pass" style="--w: 60%;"></div></div>
+          </div>
+          <div class="v-card">
+            <div class="v-name">Munger</div>
+            <div class="v-verdict v-hold">HOLD</div>
+            <div class="v-conf">65</div>
+            <div class="v-conf-label">Confidence</div>
+            <div class="conf-bar-bg"><div class="conf-bar bar-hold" style="--w: 65%;"></div></div>
+          </div>
+          <div class="v-card">
+            <div class="v-name">Ackman</div>
+            <div class="v-verdict v-hold">HOLD</div>
+            <div class="v-conf">60</div>
+            <div class="v-conf-label">Confidence</div>
+            <div class="conf-bar-bg"><div class="conf-bar bar-hold" style="--w: 60%;"></div></div>
+          </div>
+          <div class="v-card">
+            <div class="v-name">Cohen</div>
+            <div class="v-verdict v-buy">BUY</div>
+            <div class="v-conf">78</div>
+            <div class="v-conf-label">Confidence</div>
+            <div class="conf-bar-bg"><div class="conf-bar bar-buy" style="--w: 78%;"></div></div>
+          </div>
+          <div class="v-card">
+            <div class="v-name">Dalio</div>
+            <div class="v-verdict v-buy">BUY</div>
+            <div class="v-conf">72</div>
+            <div class="v-conf-label">Confidence</div>
+            <div class="conf-bar-bg"><div class="conf-bar bar-buy" style="--w: 72%;"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-note">
+      <p>
+        Cohen sees <span>momentum</span> that Buffett can't see.<br>
+        Buffett sees <span>valuation risk</span> that Cohen is blind to.<br>
+        The system captures <span>both perspectives</span>.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

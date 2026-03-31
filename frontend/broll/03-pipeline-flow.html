@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Pipeline Flow</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    background: #0a0a0b;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 90px 60px 60px;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #10B981;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.2s forwards;
+    margin-bottom: 20px;
+  }
+
+  .headline {
+    font-size: 36px;
+    font-weight: 800;
+    color: #fafafa;
+    text-align: center;
+    line-height: 1.2;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.5s forwards;
+    margin-bottom: 50px;
+  }
+  .headline span { color: #10B981; }
+
+  /* Vertical pipeline */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+  }
+
+  /* Stage node */
+  .stage {
+    width: 680px;
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 16px;
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    position: relative;
+  }
+
+  .stage:nth-child(1) { animation: stageIn 0.5s ease-out 0.8s forwards; }
+  .stage:nth-child(3) { animation: stageIn 0.5s ease-out 1.6s forwards; }
+  .stage:nth-child(5) { animation: stageIn 0.5s ease-out 2.4s forwards; }
+  .stage:nth-child(7) { animation: stageIn 0.5s ease-out 3.2s forwards; }
+  .stage:nth-child(9) { animation: stageIn 0.5s ease-out 4.0s forwards; }
+  .stage:nth-child(11) { animation: stageIn 0.5s ease-out 4.8s forwards; }
+
+  .stage-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 24px;
+  }
+
+  .stage-info { flex: 1; }
+
+  .stage-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fafafa;
+    margin-bottom: 4px;
+  }
+
+  .stage-desc {
+    font-size: 14px;
+    color: #71717a;
+    line-height: 1.4;
+  }
+
+  .stage-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+  }
+
+  /* Connector arrows */
+  .connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 44px;
+    justify-content: center;
+    opacity: 0;
+  }
+
+  .connector:nth-child(2) { animation: connIn 0.3s ease-out 1.3s forwards; }
+  .connector:nth-child(4) { animation: connIn 0.3s ease-out 2.1s forwards; }
+  .connector:nth-child(6) { animation: connIn 0.3s ease-out 2.9s forwards; }
+  .connector:nth-child(8) { animation: connIn 0.3s ease-out 3.7s forwards; }
+  .connector:nth-child(10) { animation: connIn 0.3s ease-out 4.5s forwards; }
+
+  .conn-line-v {
+    width: 2px;
+    height: 20px;
+    background: #3f3f46;
+  }
+
+  .conn-arrow {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid #3f3f46;
+  }
+
+  /* Animated data particles */
+  .particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #0A84FF;
+    opacity: 0;
+  }
+
+  /* Stage colors */
+  .s-scanner .stage-icon { background: #0A84FF15; color: #0A84FF; }
+  .s-scanner .stage-badge { background: #0A84FF15; color: #0A84FF; }
+
+  .s-detect .stage-icon { background: #F59E0B15; color: #F59E0B; }
+  .s-detect .stage-badge { background: #F59E0B15; color: #F59E0B; }
+
+  .s-gate .stage-icon { background: #EF444415; color: #EF4444; }
+  .s-gate .stage-badge { background: #EF444415; color: #EF4444; }
+
+  .s-agents .stage-icon { background: #8B5CF615; color: #8B5CF6; }
+  .s-agents .stage-badge { background: #8B5CF615; color: #8B5CF6; }
+
+  .s-committee .stage-icon { background: #10B98115; color: #10B981; }
+  .s-committee .stage-badge { background: #10B98115; color: #10B981; }
+
+  .s-cio .stage-icon { background: #0A84FF15; color: #0A84FF; }
+  .s-cio .stage-badge { background: #0A84FF15; color: #0A84FF; }
+
+  /* Active stage glow */
+  .stage.active {
+    border-color: #0A84FF55;
+    box-shadow: 0 0 30px rgba(10,132,255,0.1);
+  }
+
+  /* Timing label */
+  .timing {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #52525b;
+    position: absolute;
+    right: -80px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes stageIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes connIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+
+  <div class="content">
+    <div class="section-label">Real-Time Pipeline</div>
+    <div class="headline">Scans the Market <span>Every 15 Minutes</span></div>
+
+    <div class="pipeline">
+      <!-- 1. Scanner -->
+      <div class="stage s-scanner">
+        <div class="stage-icon">&#x1F50D;</div>
+        <div class="stage-info">
+          <div class="stage-name">Market Scanner</div>
+          <div class="stage-desc">Real-time OHLCV data from Polygon API across watchlist</div>
+        </div>
+        <div class="stage-badge">EVERY 15m</div>
+      </div>
+
+      <div class="connector">
+        <div class="conn-line-v"></div>
+        <div class="conn-arrow"></div>
+      </div>
+
+      <!-- 2. Signal Detection -->
+      <div class="stage s-detect">
+        <div class="stage-icon">&#x26A1;</div>
+        <div class="stage-info">
+          <div class="stage-name">Signal Detection</div>
+          <div class="stage-desc">Volume spikes, price breakouts, insider clusters, news catalysts</div>
+        </div>
+        <div class="stage-badge">4 DETECTORS</div>
+      </div>
+
+      <div class="connector">
+        <div class="conn-line-v"></div>
+        <div class="conn-arrow"></div>
+      </div>
+
+      <!-- 3. Quality Gate -->
+      <div class="stage s-gate">
+        <div class="stage-icon">&#x1F6E1;</div>
+        <div class="stage-info">
+          <div class="stage-name">Quality Gate</div>
+          <div class="stage-desc">Filters noise to prevent wasting LLM budget on weak signals</div>
+        </div>
+        <div class="stage-badge">COST CONTROL</div>
+      </div>
+
+      <div class="connector">
+        <div class="conn-line-v"></div>
+        <div class="conn-arrow"></div>
+      </div>
+
+      <!-- 4. Agent Fan-out -->
+      <div class="stage s-agents">
+        <div class="stage-icon">&#x1F9E0;</div>
+        <div class="stage-info">
+          <div class="stage-name">5 AI Agents (Parallel)</div>
+          <div class="stage-desc">GPT-4o with enforced information asymmetry per persona</div>
+        </div>
+        <div class="stage-badge">5x PARALLEL</div>
+      </div>
+
+      <div class="connector">
+        <div class="conn-line-v"></div>
+        <div class="conn-arrow"></div>
+      </div>
+
+      <!-- 5. Committee -->
+      <div class="stage s-committee">
+        <div class="stage-icon">&#x1F91D;</div>
+        <div class="stage-info">
+          <div class="stage-name">Committee Aggregation</div>
+          <div class="stage-desc">Variance scoring, asymmetric bet detection, consensus check</div>
+        </div>
+        <div class="stage-badge">FAN-IN</div>
+      </div>
+
+      <div class="connector">
+        <div class="conn-line-v"></div>
+        <div class="conn-arrow"></div>
+      </div>
+
+      <!-- 6. CIO Decision -->
+      <div class="stage s-cio">
+        <div class="stage-icon">&#x1F3AF;</div>
+        <div class="stage-info">
+          <div class="stage-name">CIO Decision</div>
+          <div class="stage-desc">Final verdict: INVEST, MONITOR, or PASS with conviction score</div>
+        </div>
+        <div class="stage-badge">OUTPUT</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
